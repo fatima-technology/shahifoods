@@ -225,6 +225,39 @@ table.ph-off .ph{opacity:.35}
 @media print{table.ph-off .ph{display:none}}
 .tab svg{width:16px;height:16px;flex:none}
 @media (max-width:480px){.tab{padding:7px 10px;gap:5px}.tab svg{width:15px;height:15px}}
+/* movable header */
+.sheet-head.lay{position:relative;display:block;height:40mm;margin:9mm 12mm 4mm;padding:0}
+.lay .el{position:absolute;--s:1;touch-action:none;line-height:1.1}
+.lay .el-logo img{display:block;height:calc(22mm*var(--s));max-width:calc(48mm*var(--s));object-fit:contain}
+.lay .logo-empty{width:calc(22mm*var(--s));height:calc(22mm*var(--s));border:1.5px dashed var(--line);border-radius:10px;display:grid;place-items:center;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer}
+.lay .el-name h2{margin:0;font-family:var(--f-display);font-weight:var(--dw,400);font-size:calc(26px*var(--s));text-transform:uppercase;white-space:nowrap}
+.lay .el-name p{margin:calc(4px*var(--s)) 0 0;color:var(--muted);font-size:calc(13px*var(--s));font-weight:600;white-space:nowrap}
+.lay .el-pclogo img{display:block;height:calc(14mm*var(--s));max-width:calc(40mm*var(--s));object-fit:contain}
+.lay .el-pcname small{display:block;font-size:calc(10px*var(--s));letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.lay .el-pcname b{display:block;font-family:var(--f-display);font-weight:var(--dw,400);font-size:calc(17px*var(--s));text-transform:uppercase;white-space:nowrap;margin-top:2px}
+.lay .el-date{font-size:calc(12px*var(--s));color:var(--muted);font-weight:600}
+.lay .el-date b{display:block;color:var(--ink);font-family:var(--f-mono);font-size:calc(15px*var(--s));font-weight:800}
+.lay .el.is-empty{display:none}
+.lay.editing .el.is-empty{display:block}
+.el-empty{border:1.5px dashed var(--line);border-radius:8px;padding:6px 10px;color:var(--muted);font-size:11px;font-weight:700;white-space:nowrap}
+.lay.editing .el{outline:1.5px dashed var(--accent);outline-offset:3px;cursor:grab;border-radius:4px}
+.lay.editing .el:active{cursor:grabbing}
+.lay.editing .el.sel{outline:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.lay.editing{background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:5% 12.5%}
+.laybar{scroll-margin-top:110px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--head-bg);color:var(--head-fg);border-radius:10px;padding:8px 12px;margin:8px auto 0;width:210mm;max-width:100%;font-size:13px;font-weight:600}
+.laybar b{color:#ffcf6b}
+.laybar .btn{background:transparent;color:var(--head-fg);border-color:rgba(255,255,255,.25)}
+.laybar .btn.red{background:var(--accent);border-color:var(--accent)}
+.laybar .sp{flex:1}
+@media (max-width:820px){.sheet-head.lay{margin:16px}}
+@media print{.sheet-head.lay{margin:0 0 4mm;background:none}.lay .el.is-empty,.lay .logo-empty,.laybar{display:none!important}.lay .el{outline:0!important;background:none!important}}
+/* font picker + password */
+.fontbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.fontbar .field{flex:1;min-width:200px}
+.fontopt .pv{font-size:19px!important}
+.pw{position:relative;margin-top:8px}.pw .inp{padding-right:46px}
+.eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:none;width:38px;height:34px;cursor:pointer;color:var(--muted);display:grid;place-items:center;border-radius:6px}
+.eye:hover{color:var(--ink);background:var(--surface-2)}.eye svg{width:20px;height:20px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--head-bg);color:var(--head-fg);padding:10px 18px;border-radius:9px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.2s;z-index:20;max-width:calc(100% - 32px)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -261,7 +294,7 @@ table.ph-off .ph{opacity:.35}
   <div class="wrap">
     <div class="brand">
       <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg></div>
-      <div><h1>CARTON RATE LIST<span class="ver">v3.3</span></h1><small>Carton rate · Piece rate · Packing</small></div>
+      <div><h1>CARTON RATE LIST<span class="ver">v3.4</span></h1><small>Carton rate · Piece rate · Packing</small></div>
     </div>
     <button class="cloudpill" id="cloudPill" data-st="off" type="button" title="Cloud sync"><i></i><span id="cloudTxt">Cloud off</span></button>
     <nav class="tabs" role="tablist">
@@ -307,17 +340,21 @@ table.ph-off .ph{opacity:.35}
   <div class="toolbar">
     <span class="framenote" id="frameNote" hidden>PDF, Excel and Print work when you open the file from GitHub Pages or your browser.</span>
     <span class="spacer"></span>
+    <button class="btn sm" type="button" id="rlLay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9 2 12l3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>Move logo &amp; name</button>
     <button class="btn sm" data-top id="rlXls"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Excel</button>
     <button class="btn sm" data-top id="rlPrint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg>Print</button>
     <button class="btn sm red" data-top id="rlPdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M9 15h6"/></svg>Download PDF</button>
   </div>
 
   <span class="a4tag">A4 page · what the PDF looks like</span>
+  <div class="laybar" hidden><span>Drag the logo, names and date to place them.</span><span>Selected: <b class="lsel">tap an item</b></span><button class="btn sm lsz" data-d="-1" type="button">− Smaller</button><button class="btn sm lsz" data-d="1" type="button">+ Bigger</button><span class="sp"></span><button class="btn sm lreset" type="button">Reset</button><button class="btn sm red ldone" type="button">Done</button></div>
   <article class="sheet">
-    <div class="sheet-head">
-      <div class="logo-box brand-logo"></div>
-      <div class="co"><h2 class="brand-co">Your Company</h2><p class="brand-sub"></p></div>
-      <div class="meta"><div id="pcoBox" class="pco-slot" data-label="Rate list of"></div><span>Updated</span><b id="rlDate">—</b></div>
+    <div class="sheet-head lay" data-pclabel="Rate list of">
+      <div class="el el-logo" data-el="logo"></div>
+      <div class="el el-name" data-el="name"><h2 class="brand-co">Your Company</h2><p class="brand-sub"></p></div>
+      <div class="el el-pclogo" data-el="pclogo"></div>
+      <div class="el el-pcname" data-el="pcname"></div>
+      <div class="el el-date" data-el="date"><span>Updated</span><b id="rlDate">—</b></div>
     </div>
     <div class="tape"><span id="rlTitle">Rate List</span><small id="rlCount"></small></div>
     <div class="tbl-wrap">
@@ -350,14 +387,20 @@ table.ph-off .ph{opacity:.35}
     <label class="chk"><input type="checkbox" id="sHideZero" checked> Hide zero stock</label>
     <div class="field" title="Date printed on the stock report"><span style="font-size:12px;font-weight:800;opacity:.75">Date</span><input id="srDateIn" type="date" aria-label="Stock report date"></div>
     <span class="spacer"></span>
+    <button class="btn sm" type="button" id="srLay">Move logo &amp; name</button>
+    <button class="btn sm" data-top id="srXls">Excel</button>
     <button class="btn sm" data-top id="srPrint">Print</button>
+    <button class="btn sm red" data-top id="srPdf">Download PDF</button>
   </div>
   <span class="a4tag">A4 page</span>
+  <div class="laybar" hidden><span>Drag the logo, names and date to place them.</span><span>Selected: <b class="lsel">tap an item</b></span><button class="btn sm lsz" data-d="-1" type="button">− Smaller</button><button class="btn sm lsz" data-d="1" type="button">+ Bigger</button><span class="sp"></span><button class="btn sm lreset" type="button">Reset</button><button class="btn sm red ldone" type="button">Done</button></div>
   <article class="sheet">
-    <div class="sheet-head">
-      <div class="logo-box brand-logo"></div>
-      <div class="co"><h2 class="brand-co">Your Company</h2><p class="brand-sub"></p></div>
-      <div class="meta"><div class="pco-slot" data-label="Stock of"></div><span>Report date</span><b id="srDate">—</b></div>
+    <div class="sheet-head lay" data-pclabel="Stock of">
+      <div class="el el-logo" data-el="logo"></div>
+      <div class="el el-name" data-el="name"><h2 class="brand-co">Your Company</h2><p class="brand-sub"></p></div>
+      <div class="el el-pclogo" data-el="pclogo"></div>
+      <div class="el el-pcname" data-el="pcname"></div>
+      <div class="el el-date" data-el="date"><span>Report date</span><b id="srDate">—</b></div>
     </div>
     <div class="tape"><span>Stock Report · Carton-wise</span><small id="srCount"></small></div>
     <div class="tbl-wrap">
@@ -403,8 +446,15 @@ table.ph-off .ph{opacity:.35}
     </div>
   </div>
   <div class="card" style="margin-top:16px">
-    <h3>Heading font</h3><p class="hint">Used for the company names and the rate list title on screen, in print and in the PDF.</p>
+    <h3>Heading font</h3><p class="hint">All Google fonts. Used for the company names and titles on screen, in print and in the PDF. Current: <b id="fontCur"></b></p>
+    <div class="fontbar">
+      <div class="field search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="fontQ" placeholder="Search fonts — e.g. Bebas, Lobster, Nastaliq" aria-label="Search fonts"></div>
+      <div class="field"><select id="fontCat" aria-label="Font style"><option value="">All styles</option><option value="s">Sans serif</option><option value="r">Serif</option><option value="d">Display</option><option value="h">Handwriting</option><option value="m">Monospace</option><option value="a">Urdu / Arabic</option></select></div>
+      <div class="field"><input id="fontSample" placeholder="Preview text" aria-label="Preview text" style="width:170px"></div>
+    </div>
+    <p class="hint" id="fontCount" style="margin:0 0 10px"></p>
     <div class="fonts" id="fontGrid"></div>
+    <div class="row" style="justify-content:center;margin-top:12px"><button class="btn" id="fontMore" type="button">Show more fonts</button></div>
   </div>
   <div class="card cloudcard" id="cloudCard">
     <h3>Cloud sync (Firebase)</h3>
@@ -421,7 +471,7 @@ table.ph-off .ph{opacity:.35}
         <label class="f" for="fbEmail">2 · Sign in</label>
         <div id="fbLoggedOut">
           <input class="inp" id="fbEmail" type="email" placeholder="Email" autocomplete="username">
-          <input class="inp" id="fbPass" type="password" placeholder="Password (6+ characters)" autocomplete="current-password" style="margin-top:8px">
+          <div class="pw"><input class="inp" id="fbPass" type="password" placeholder="Password (6+ characters)" autocomplete="current-password"><button type="button" class="eye" id="fbEye" aria-label="Show password" title="Show password"></button></div>
           <div class="row" style="margin-top:8px"><button class="btn red" id="fbIn" type="button">Sign in</button><button class="btn" id="fbUp" type="button">Create account</button><button class="btn sm" id="fbReset" type="button">Forgot password</button></div>
         </div>
         <div id="fbLoggedIn" hidden>
@@ -454,7 +504,7 @@ service cloud.firestore {
   <div class="savebar" id="saveBar"><span class="st" id="saveSt">All settings saved</span><button class="btn" id="bDiscard">Undo changes</button><button class="btn red" id="bSave">Save settings</button></div>
 </section>
 
-<footer class="appfoot no-print"><span><b>FATIMA-TECH</b> · Carton Rate List v3.3</span><span>Saved in this browser · make a backup from Settings</span></footer>
+<footer class="appfoot no-print"><span><b>FATIMA-TECH</b> · Carton Rate List v3.4</span><span>Saved in this browser · make a backup from Settings</span></footer>
 </main>
 <div class="toast" id="toast" role="status"></div>
 
@@ -681,26 +731,16 @@ segSync();
 ['q','cat','sort','onlyOk','showPh'].forEach(id=>{$('#'+id).addEventListener('input',renderList);$('#'+id).addEventListener('change',renderList)});
 
 /* ---------- PDF (A4, with photos) ---------- */
-$('#rlPdf').onclick=()=>{
+$('#rlPdf').onclick=async()=>{
   if(!window.jspdf||!window.jspdf.jsPDF){toast('The PDF maker did not load — check the internet');return}
+  toast('Making PDF…');
   const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});
   const W=210,M=12,co=(brand.company||'Your Company').toUpperCase(),title=brand.listTitle||'Rate List';
-  let x=M;
-  if(brand.logo){try{const p=doc.getImageProperties(brand.logo);const h=20,w=Math.min(36,p.width/p.height*h);doc.addImage(brand.logo,'PNG',M,11,w,h);x=M+w+5}catch(e){}}
-  const HF=curFont().pdf;
-  doc.setFont(HF,'bold');doc.setFontSize(19);doc.setTextColor(20,18,22);doc.text(co,x,20,{maxWidth:W-x-M-62});
-  if(brand.sub){doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.setTextColor(95,86,90);doc.text(brand.sub,x,26.5)}
-  let ry=W-M;
-  if(brand.pcLogo){try{const p=doc.getImageProperties(brand.pcLogo);const h=16,w=Math.min(34,p.width/p.height*h);doc.addImage(brand.pcLogo,'PNG',W-M-w,9,w,h);ry=W-M-w-4}catch(e){}}
-  if(brand.pcName){const tx=brand.pcLogo?ry:W-M;doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(95,86,90);doc.text('RATE LIST OF',tx,14,{align:'right'});
-    doc.setFont(HF,'bold');doc.setFontSize(12.5);doc.setTextColor(20,18,22);doc.text(brand.pcName.toUpperCase(),tx,20,{align:'right',maxWidth:60})}
   const rows=listRows(),so=$('#sort').value;
-  doc.setFillColor(208,32,43);doc.rect(M,35,W-2*M,9,'F');doc.setFillColor(20,18,22);doc.rect(M,44,W-2*M,1.2,'F');
-  doc.setTextColor(255,255,255);doc.setFont(HF,'bold');doc.setFontSize(11.5);doc.text(((brand.pcName?brand.pcName+' · ':'')+title).toUpperCase(),M+4,41.2);doc.setFont('helvetica','bold');
-  doc.setFontSize(8.5);doc.text(`Updated ${fmtDate(listDate())} · ${rows.length} products`,W-M-4,41,{align:'right'});
+  const hd=await headerImage('rl',(brand.pcName?brand.pcName+' · ':'')+title,`${rows.length} products`);doc.addImage(hd.url,'PNG',M,8,W-2*M,hd.h);
   const usePh=$('#showPh').checked&&rows.some(r=>photos[r.k]);const body=[],imgs=[];let n=0,lastCat;
   rows.forEach(({k,m})=>{
-    if(so==='cat'&&m.cat!==lastCat){lastCat=m.cat;body.push([{content:(m.cat||'Other').toUpperCase(),colSpan:usePh?6:5,styles:{fillColor:[247,243,242],textColor:[158,15,24],fontStyle:'bold',fontSize:8.5}}]);imgs.push(null)}
+    if(so==='cat'&&m.cat!==lastCat){lastCat=m.cat;body.push([{content:(m.cat||'Other').toUpperCase(),colSpan:usePh?6:5,styles:{fillColor:[247,243,242],textColor:[158,15,24],fontStyle:'bold',fontSize:8.5,halign:'left'}}]);imgs.push(null)}
     n++;const P=okP(m),c=ctnOf(m),p=pcOf(m);
     const r=[String(n),m.name,P?`${P} pcs`:'—',c?nf2.format(c):'—',p?nf2.format(p):'—'];if(usePh)r.splice(1,0,'');
     body.push(r);imgs.push(photos[k]||null);
@@ -709,7 +749,7 @@ $('#rlPdf').onclick=()=>{
   const o=usePh?1:0;const cs={0:{cellWidth:9,halign:'center',textColor:[110,100,104]}};
   if(usePh)cs[1]={cellWidth:19};
   cs[1+o]={fontStyle:'bold'};cs[2+o]={cellWidth:22,halign:'right'};cs[3+o]={cellWidth:30,halign:'right',fontStyle:'bold',textColor:[158,15,24],fillColor:[253,240,240]};cs[4+o]={cellWidth:28,halign:'right',fontStyle:'bold'};
-  doc.autoTable({startY:48,head,body,margin:{left:M,right:M,bottom:16,top:14},theme:'grid',
+  doc.autoTable({startY:8+hd.h+3,head,body,margin:{left:M,right:M,bottom:16,top:14},theme:'grid',
     styles:{font:'helvetica',fontSize:9.5,cellPadding:2.4,valign:'middle',lineColor:[225,217,215],lineWidth:.2,textColor:[20,18,22]},
     headStyles:{fillColor:[20,18,22],textColor:255,fontStyle:'bold',fontSize:8.5},columnStyles:cs,
     didParseCell:d=>{if(d.section==='head'&&d.column.index>=2+o)d.cell.styles.halign='right';if(usePh&&d.section==='body'&&imgs[d.row.index])d.cell.styles.minCellHeight=17},
@@ -780,6 +820,52 @@ function renderStock(){
   $('#sAmt').textContent='Rs '+nf0.format(all.reduce((s,x)=>s+(x.c.amt||0),0));$('#sMiss').textContent=all.filter(x=>!x.c.isCtn&&!x.c.P&&x.r.qty!==0).length;
   $('#srDate').textContent=fmtDate(report.date);$('#srDateIn').value=report.date||'';$('#srCount').textContent=`${rows.length} products · ${nf0.format(t.ctn)} ctn`;
 }
+function stockRows(){
+  if(!report)return{rows:[],so:'file',catOf:()=>''};
+  const q=$('#sq').value.trim().toUpperCase(),hz=$('#sHideZero').checked,so=$('#ssort').value,catOf=r=>r.cat||(master[keyOf(r.name)]||{}).cat||'Other';
+  const rows=report.rows.filter(r=>(!q||r.name.toUpperCase().includes(q))&&(!hz||r.qty!==0));
+  if(so==='name')rows.sort((a,b)=>a.name.localeCompare(b.name));
+  if(so==='cat')rows.sort((a,b)=>catOf(a).localeCompare(catOf(b))||a.name.localeCompare(b.name));
+  return{rows,so,catOf};
+}
+const dash=v=>v==null?'—':v;
+$('#srPdf').onclick=async()=>{
+  if(!report){toast('Upload a stock report first');return}
+  if(!window.jspdf||!window.jspdf.jsPDF){toast('The PDF maker did not load — check the internet');return}
+  toast('Making PDF…');
+  const {rows,so,catOf}=stockRows();const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});const W=210,M=12,co=(brand.company||'Your Company').toUpperCase();
+  const t={ctn:0,loose:0,pcs:0,amt:0};rows.forEach(r=>{const c=srCalc(r);t.ctn+=c.ctn||0;t.loose+=c.loose||0;t.pcs+=c.pcs||0;t.amt+=c.amt||0});
+  const hd=await headerImage('sr','Stock Report · Carton-wise',`${rows.length} products · ${nf0.format(t.ctn)} ctn`);doc.addImage(hd.url,'PNG',M,8,W-2*M,hd.h);
+  const body=[];let g=null,gt=null,n=0;
+  const sub=()=>{if(g!==null&&so==='cat')body.push([{content:`${g} total`,colSpan:3,styles:{halign:'right',fontStyle:'bold',fillColor:[247,243,242]}},...[gt.pcs,gt.ctn,gt.loose].map(v=>({content:nf0.format(v),styles:{fontStyle:'bold',fillColor:[247,243,242]}})),{content:'',styles:{fillColor:[247,243,242]}},{content:nf2.format(gt.amt),styles:{fontStyle:'bold',fillColor:[247,243,242]}}])};
+  rows.forEach(r=>{const c=srCalc(r);
+    if(so==='cat'&&catOf(r)!==g){sub();g=catOf(r);gt={ctn:0,loose:0,pcs:0,amt:0};body.push([{content:g.toUpperCase(),colSpan:8,styles:{fillColor:[247,243,242],textColor:[158,15,24],fontStyle:'bold',fontSize:8.5,halign:'left'}}])}
+    if(gt){gt.ctn+=c.ctn||0;gt.loose+=c.loose||0;gt.pcs+=c.pcs||0;gt.amt+=c.amt||0}
+    body.push([String(++n),r.name,c.isCtn?'carton':dash(c.P||null),c.pcs!=null?nf0.format(c.pcs):'—',c.ctn!=null?nf0.format(c.ctn):'—',c.loose!=null?nf0.format(c.loose):'—',c.rpc?nf2.format(c.rpc):'—',nf2.format(c.amt||0)])});
+  sub();
+  doc.autoTable({startY:8+hd.h+3,head:[['#','Product','Packing','Stock pcs','Cartons','Loose','Rate / pc','Amount']],body,
+    foot:[[{content:`TOTAL · ${rows.length} products`,colSpan:3,styles:{halign:'right'}},nf0.format(t.pcs),nf0.format(t.ctn),nf0.format(t.loose),'',nf2.format(t.amt)]],
+    margin:{left:M,right:M,bottom:16,top:14},theme:'grid',showFoot:'lastPage',
+    styles:{font:'helvetica',fontSize:8.8,cellPadding:2,valign:'middle',lineColor:[225,217,215],lineWidth:.2,textColor:[20,18,22]},
+    headStyles:{fillColor:[20,18,22],textColor:255,fontStyle:'bold',fontSize:8},footStyles:{fillColor:[20,18,22],textColor:255,fontStyle:'bold'},
+    columnStyles:{0:{cellWidth:8,halign:'center',textColor:[110,100,104]},1:{fontStyle:'bold'},2:{cellWidth:16,halign:'right'},3:{cellWidth:19,halign:'right'},4:{cellWidth:17,halign:'right',fontStyle:'bold',textColor:[158,15,24],fillColor:[253,240,240]},5:{cellWidth:14,halign:'right'},6:{cellWidth:19,halign:'right'},7:{cellWidth:26,halign:'right',fontStyle:'bold'}},
+    didParseCell:d=>{if((d.section==='head'||d.section==='foot')&&d.column.index>=2)d.cell.styles.halign='right'},
+    didDrawPage:d=>{const ph=doc.internal.pageSize.getHeight();doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(110,100,104);
+      doc.text(`${co} · Stock Report${brand.pcName?' · '+brand.pcName:''} · ${fmtDate(report.date)}`,M,ph-8);doc.text(`Page ${d.pageNumber} of {total}`,W-M,ph-8,{align:'right'})}});
+  if(doc.putTotalPages)doc.putTotalPages('{total}');
+  doc.save(`Stock-Report-${report.date}.pdf`);toast('PDF downloaded');
+};
+$('#srXls').onclick=()=>{
+  if(!report){toast('Upload a stock report first');return}
+  const {rows,catOf}=stockRows();
+  const aoa=[[brand.company||'Your Company'],[`Stock Report · Carton-wise${brand.pcName?' · '+brand.pcName:''} · ${fmtDate(report.date)}`],[],['#','Product','Category','Packing (pcs/ctn)','Stock (pcs)','Cartons','Loose pcs','Rate / pc','Amount']];
+  const t={ctn:0,loose:0,pcs:0,amt:0};
+  rows.forEach((r,i)=>{const c=srCalc(r);t.ctn+=c.ctn||0;t.loose+=c.loose||0;t.pcs+=c.pcs||0;t.amt+=c.amt||0;
+    aoa.push([i+1,r.name,catOf(r),c.isCtn?'carton':(c.P||''),c.pcs??'',c.ctn??'',c.loose??'',c.rpc?+c.rpc.toFixed(2):'',+(c.amt||0).toFixed(2)])});
+  aoa.push(['','TOTAL','','',t.pcs,t.ctn,t.loose,'',+t.amt.toFixed(2)]);
+  const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=[{wch:4},{wch:40},{wch:16},{wch:10},{wch:11},{wch:9},{wch:9},{wch:10},{wch:14}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Stock Report');XLSX.writeFile(wb,`Stock-Report-${report.date}.xlsx`);
+};
 $('#pick').onclick=()=>$('#file').click();$('#file').onchange=e=>{handleFile(e.target.files[0]);e.target.value=''};
 const drop=$('#drop');['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag')}));
 ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag')}));drop.addEventListener('drop',e=>handleFile(e.dataTransfer.files[0]));
@@ -791,8 +877,13 @@ function renderBrand(){
   const co=brand.company||'Your Company';
   document.querySelectorAll('.brand-co').forEach(e=>e.textContent=co);document.querySelectorAll('.brand-sub').forEach(e=>e.textContent=brand.sub||'');
   document.querySelectorAll('.brand-foot').forEach(e=>e.textContent=brand.foot||'');
-  document.querySelectorAll('.brand-logo').forEach(lb=>{if(brand.logo){lb.className='logo-box brand-logo';lb.innerHTML=`<img src="${brand.logo}" alt="Logo">`}else{lb.className='logo-box brand-logo empty';lb.innerHTML='Add logo'}});
-  document.querySelectorAll('.pco-slot').forEach(el=>{el.innerHTML=brand.pcLogo||brand.pcName?`<div class="pco">${brand.pcLogo?`<img src="${brand.pcLogo}" alt="">`:''}${brand.pcName?`<div><small>${el.dataset.label}</small><b>${esc(brand.pcName)}</b></div>`:''}</div>`:''});
+  document.querySelectorAll('.lay').forEach(h=>{
+    const q=n=>h.querySelector(`[data-el="${n}"]`);
+    q('logo').innerHTML=brand.logo?`<img src="${brand.logo}" alt="Logo">`:'<div class="logo-empty">Add logo</div>';
+    q('pclogo').innerHTML=brand.pcLogo?`<img src="${brand.pcLogo}" alt="">`:'<div class="el-empty">Company logo</div>';q('pclogo').classList.toggle('is-empty',!brand.pcLogo);
+    q('pcname').innerHTML=brand.pcName?`<small>${esc(h.dataset.pclabel)}</small><b>${esc(brand.pcName)}</b>`:'<div class="el-empty">Company name</div>';q('pcname').classList.toggle('is-empty',!brand.pcName);
+  });
+  applyLayout();
   $('#pcLogoPrev').innerHTML=brand.pcLogo?`<img src="${brand.pcLogo}" alt="Company logo">`:'<span style="color:var(--muted);font-size:12px">No logo</span>';
   $('#bLogoPrev').innerHTML=brand.logo?`<img src="${brand.logo}" alt="Logo">`:'<span style="color:var(--muted);font-size:12px">No logo</span>';
 }
@@ -802,31 +893,98 @@ function markDirty(){dirty=true;const st=$('#saveSt');st.textContent='Unsaved ch
 $('#bSave').onclick=()=>{if(saveBrand()){dirty=false;const st=$('#saveSt');st.textContent='Saved at '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});st.classList.remove('dirty');toast('Settings saved')}else toast('Could not save — browser storage is full or blocked')};
 $('#bDiscard').onclick=()=>{brand=Object.assign(defBrand(),LS.get('cs_brand',{}));dirty=false;fillBrand();applyFont();renderBrand();renderList();renderFonts();const st=$('#saveSt');st.textContent='Changes undone';st.classList.remove('dirty')};
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
-/* heading fonts */
-const FONTS=[
- {id:'archivo',name:'Archivo Black',q:'Archivo+Black',w:400,pdf:'helvetica'},
- {id:'anton',name:'Anton',q:'Anton',w:400,pdf:'helvetica'},
- {id:'bebas',name:'Bebas Neue',q:'Bebas+Neue',w:400,pdf:'helvetica'},
- {id:'oswald',name:'Oswald',q:'Oswald:wght@700',w:700,pdf:'helvetica'},
- {id:'montserrat',name:'Montserrat',q:'Montserrat:wght@900',w:900,pdf:'helvetica'},
- {id:'poppins',name:'Poppins',q:'Poppins:wght@800',w:800,pdf:'helvetica'},
- {id:'russo',name:'Russo One',q:'Russo+One',w:400,pdf:'helvetica'},
- {id:'righteous',name:'Righteous',q:'Righteous',w:400,pdf:'helvetica'},
- {id:'playfair',name:'Playfair Display',q:'Playfair+Display:wght@900',w:900,pdf:'times'},
- {id:'slab',name:'Roboto Slab',q:'Roboto+Slab:wght@800',w:800,pdf:'times'}];
-const curFont=()=>FONTS.find(f=>f.id===brand.headFont)||FONTS[0];
-const loaded=new Set(['archivo']);
-function loadFonts(list){const need=list.filter(f=>!loaded.has(f.id));if(!need.length)return;need.forEach(f=>loaded.add(f.id));
-  const l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?'+need.map(f=>'family='+f.q).join('&')+'&display=swap';document.head.appendChild(l)}
-function applyFont(){const f=curFont();loadFonts([f]);document.documentElement.style.setProperty('--f-display',`"${f.name}","Arial Black",Impact,sans-serif`);document.documentElement.style.setProperty('--dw',f.w)}
-function renderFonts(){const sample=(brand.company||brand.pcName||'Al Qadir Traders');
-  $('#fontGrid').innerHTML=FONTS.map(f=>`<button type="button" class="fontopt" data-font="${f.id}" aria-pressed="${f.id===curFont().id}"><span class="pv" style="font-family:'${f.name}',sans-serif;font-weight:${f.w}">${esc(sample)}</span><small>${f.name}${f.id==='archivo'?' · default':''}</small></button>`).join('')}
+/* heading fonts — the full Google Fonts library */
+const FONTLIST="ABeeZee~s4|ADLaM Display~d4|AR One Sans~s7|Abel~s4|Abhaya Libre~r8|Aboreto~d4|Abril Fatface~d4|Abyssinica SIL~r4|Aclonica~s4|Acme~s4|Actor~s4|Adamina~r4|Advent Pro~s9|Afacad~s7|Afacad Flux~s9|Agbalumo~d4|Agdasima~s7|Agu Display~d4|Aguafina Script~h4|Akatab~s9|Akaya Kanadaka~d4|Akaya Telivigala~d4|Akronim~d4|Akshar~s7|Aladin~d4|Alan Sans~s9|Alata~s4|Alatsi~s4|Albert Sans~s9|Aldrich~s4|Alef~s7|Alegreya~r9|Alegreya SC~r9|Alegreya Sans~s9|Alegreya Sans SC~s9|Aleo~r9|Alex Brush~h4|Alexandria~sa9|Alfa Slab One~d4|Alice~r4|Alike~r4|Alike Angular~r4|Alkalami~ra4|Alkatra~d7|Allan~d7|Allerta~s4|Allerta Stencil~s4|Allison~h4|Allura~h4|Almarai~sa8|Almendra~r7|Almendra Display~d4|Almendra SC~r4|Alumni Sans~s9|Alumni Sans Collegiate One~s4|Alumni Sans Inline One~d4|Alumni Sans Pinstripe~s4|Alumni Sans SC~s9|Amarante~d4|Amaranth~s7|Amarna~s7|Amatic SC~h7|Amethysta~r4|Amiko~s7|Amiri~ra7|Amiri Quran~ra4|Amita~h7|Anaheim~s8|Ancizar Sans~s9|Ancizar Serif~r9|Andada Pro~r8|Andika~s7|Anek Bangla~s8|Anek Devanagari~s8|Anek Gujarati~s8|Anek Gurmukhi~s8|Anek Kannada~s8|Anek Latin~s8|Anek Malayalam~s8|Anek Odia~s8|Anek Tamil~s8|Anek Telugu~s8|Angkor~d4|Annapurna SIL~r7|Annie Use Your Telescope~h4|Anonymous Pro~m7|Anta~s4|Antic~s4|Antic Didone~r4|Antic Slab~r4|Anton~s4|Anton SC~s4|Antonio~s7|Anuphan~s7|Anybody~d9|Aoboshi One~r4|Arapey~r4|Arbutus~r4|Arbutus Slab~r4|Architects Daughter~h4|Archivo~s9|Archivo Black~s4|Archivo Narrow~s7|Are You Serious~h4|Aref Ruqaa~ra7|Aref Ruqaa Ink~ra7|Arima~d7|Arimo~s7|Arizonia~h4|Armata~s4|Arsenal~s7|Arsenal SC~s7|Artifika~r4|Arvo~r7|Arya~s7|Asap~s9|Asap Condensed~s9|Asar~r4|Asimovian~s4|Asset~d4|Assistant~s8|Asta Sans~s8|Astloch~d7|Asul~r7|Athiti~s7|Atkinson Hyperlegible~s7|Atkinson Hyperlegible Mono~s8|Atkinson Hyperlegible Next~s8|Atma~d7|Atomic Age~d4|Aubrey~d4|Audiowide~d4|Autour One~d4|Average~r4|Average Sans~s4|Averia Gruesa Libre~d4|Averia Libre~d7|Averia Sans Libre~d7|Averia Serif Libre~d7|Azeret Mono~m9|B612~s7|B612 Mono~m7|BBH Bartle~s4|BBH Bogle~s4|BBH Hegarty~s4|BIZ UDGothic~s7|BIZ UDMincho~r7|BIZ UDPGothic~s7|BIZ UDPMincho~r7|Babylonica~h4|Bacasime Antique~r4|Bad Script~h4|Badeen Display~da4|Bagel Fat One~d4|Bahiana~d4|Bahianita~d4|Bai Jamjuree~s7|Bakbak One~d4|Ballet~h4|Baloo 2~d8|Baloo Bhai 2~d8|Baloo Bhaijaan 2~da8|Baloo Bhaina 2~d8|Baloo Chettan 2~d8|Baloo Da 2~d8|Baloo Paaji 2~d8|Baloo Tamma 2~d8|Baloo Tammudu 2~d8|Baloo Thambi 2~d8|Balsamiq Sans~d7|Balthazar~r4|Bangers~d4|Barlow~s9|Barlow Condensed~s9|Barlow Semi Condensed~s9|Barriecito~d4|Barrio~d4|Basic~s4|Baskervville~r7|Baskervville SC~r7|Battambang~d9|Baumans~d4|Bayon~s4|Be Vietnam Pro~s9|Beau Rivage~h4|Bebas Neue~s4|Beiruti~sa9|Belanosima~s7|Belgrano~r4|Bellefair~r4|Belleza~s4|Bellota~d7|Bellota Text~d7|BenchNine~s7|Benne~r4|Bentham~r4|Berkshire Swash~h4|Besley~r9|Beth Ellen~h4|Bevan~r4|BhuTuka Expanded One~r4|Big Shoulders~d9|Big Shoulders Inline~d9|Big Shoulders Stencil~d9|Bigelow Rules~d4|Bigshot One~d4|Bilbo~h4|Bilbo Swash Caps~h4|BioRhyme~r8|BioRhyme Expanded~r8|Birthstone~h4|Birthstone Bounce~h5|Biryani~s9|Bitcount~d9|Bitcount Grid Double~d9|Bitcount Grid Double Ink~d9|Bitcount Grid Single~d9|Bitcount Grid Single Ink~d9|Bitcount Ink~d9|Bitcount Prop Double~d9|Bitcount Prop Double Ink~d9|Bitcount Prop Single~d9|Bitcount Prop Single Ink~d9|Bitcount Single~d9|Bitcount Single Ink~d9|Bitter~r9|Black And White Picture~d4|Black Han Sans~s4|Black Ops One~d4|Blaka~da4|Blaka Hollow~da4|Blaka Ink~da4|Blinker~s9|Bodoni Moda~r9|Bodoni Moda SC~r9|Bokor~d4|Boldonse~d4|Bona Nova~r7|Bona Nova SC~r7|Bonbon~h4|Bonheur Royale~h4|Boogaloo~d4|Borel~h4|Bowlby One~d4|Bowlby One SC~d4|Braah One~s4|Brawler~r7|Bree Serif~r4|Bricolage Grotesque~s8|Bruno Ace~d4|Bruno Ace SC~d4|Brygada 1918~r7|Bubblegum Sans~d4|Bubbler One~s4|Buda~d3|Buenard~r7|Bungee~d4|Bungee Hairline~d4|Bungee Inline~d4|Bungee Outline~d4|Bungee Shade~d4|Bungee Spice~d4|Bungee Tint~d4|Butcherman~d4|Butterfly Kids~h4|Bytesized~s4|Cabin~s7|Cabin Condensed~s7|Cabin Sketch~d7|Cactus Classical Serif~r4|Caesar Dressing~d4|Cagliostro~s4|Cairo~sa9|Cairo Play~sa9|Cal Sans~s4|Caladea~r7|Calistoga~d4|Calligraffitti~h4|Cambay~s7|Cambo~r4|Candal~s4|Cantarell~s7|Cantata One~r4|Cantora One~s4|Caprasimo~d4|Capriola~s4|Caramel~h4|Carattere~h4|Cardo~r7|Carlito~s7|Carme~s4|Carrois Gothic~s4|Carrois Gothic SC~s4|Carter One~d4|Cascadia Code~sa7|Cascadia Mono~sa7|Castoro~r4|Castoro Titling~d4|Catamaran~s9|Caudex~r7|Cause~h9|Caveat~h7|Caveat Brush~h4|Cedarville Cursive~h4|Ceviche One~d4|Chakra Petch~s7|Changa~sa8|Changa One~d4|Chango~d4|Charis SIL~r7|Charm~h7|Charmonman~h7|Chathura~s8|Chau Philomene One~s4|Chela One~d4|Chelsea Market~d4|Chenla~d4|Cherish~h4|Cherry Bomb One~d4|Cherry Cream Soda~d4|Cherry Swash~d7|Chewy~d4|Chicle~d4|Chilanka~h4|Chiron GoRound TC~s9|Chiron Hei HK~s9|Chiron Sung HK~r9|Chivo~s9|Chivo Mono~m9|Chocolate Classical Sans~s4|Chokokutai~d4|Chonburi~d4|Cinzel~r9|Cinzel Decorative~d9|Clicker Script~h4|Climate Crisis~d4|Coda~d8|Codystar~d4|Coiny~d4|Combo~d4|Comfortaa~d7|Comforter~h4|Comforter Brush~h4|Comic Neue~h7|Comic Relief~d7|Coming Soon~h4|Comme~s9|Commissioner~s9|Concert One~d4|Condiment~h4|Content~d7|Contrail One~d4|Convergence~s4|Cookie~h4|Copse~r4|Coral Pixels~d4|Corben~d7|Corinthia~h7|Cormorant~r7|Cormorant Garamond~r7|Cormorant Infant~r7|Cormorant SC~r7|Cormorant Unicase~r7|Cormorant Upright~r7|Cossette Texte~s7|Cossette Titre~s7|Courgette~h4|Courier Prime~m7|Cousine~m7|Coustard~r9|Covered By Your Grace~h4|Crafty Girls~h4|Creepster~d4|Crete Round~r4|Crimson Pro~r9|Crimson Text~r7|Croissant One~d4|Crushed~d4|Cuprum~s7|Cute Font~d4|Cutive~r4|Cutive Mono~m4|DM Mono~m5|DM Sans~s9|DM Serif Display~r4|DM Serif Text~r4|Dai Banna SIL~r7|Damion~h4|Dancing Script~h7|Danfo~r4|Dangrek~d4|Darker Grotesque~s9|Darumadrop One~d4|David Libre~r7|Dawning of a New Day~h4|Days One~s4|Dekko~h4|Dela Gothic One~d4|Delicious Handrawn~h4|Delius~h4|Delius Swash Caps~h4|Delius Unicase~h7|Della Respira~r4|Denk One~s4|Devonshire~h4|Dhurjati~s4|Didact Gothic~s4|Diphylleia~r4|Diplomata~d4|Diplomata SC~d4|Do Hyeon~s4|Dokdo~d4|Domine~r7|Donegal One~r4|Dongle~s7|Doppio One~s4|Dorsa~s4|Dosis~s8|DotGothic16~s4|Doto~s9|Dr Sugiyama~h4|Duru Sans~s4|DynaPuff~d7|Dynalight~d4|EB Garamond~r8|Eagle Lake~h4|East Sea Dokdo~h4|Eater~d4|Economica~s7|Eczar~r8|Edu AU VIC WA NT Arrows~h7|Edu AU VIC WA NT Dots~h7|Edu AU VIC WA NT Guides~h7|Edu AU VIC WA NT Hand~h7|Edu AU VIC WA NT Pre~h7|Edu NSW ACT Cursive~h7|Edu NSW ACT Foundation~h7|Edu NSW ACT Hand Pre~h7|Edu QLD Beginner~h7|Edu QLD Hand~h7|Edu SA Beginner~h7|Edu SA Hand~h7|Edu TAS Beginner~h7|Edu VIC WA NT Beginner~h7|Edu VIC WA NT Hand~h7|Edu VIC WA NT Hand Pre~h7|El Messiri~sa7|Electrolize~s4|Elms Sans~s9|Elsie~d9|Elsie Swash Caps~d9|Emblema One~d4|Emilys Candy~d4|Encode Sans~s9|Encode Sans Condensed~s9|Encode Sans Expanded~s9|Encode Sans SC~s9|Encode Sans Semi Condensed~s9|Encode Sans Semi Expanded~s9|Engagement~h4|Englebert~s4|Enriqueta~r7|Ephesis~h4|Epilogue~s9|Epunda Sans~s9|Epunda Slab~r9|Erica One~d4|Esteban~r4|Estonia~h4|Euphoria Script~h4|Ewert~d4|Exile~d4|Exo~s9|Exo 2~s9|Expletus Sans~d7|Explora~h4|Faculty Glyphic~s4|Fahkwang~s7|Familjen Grotesk~s7|Fanwood Text~r4|Farro~s7|Farsan~d4|Fascinate~d4|Fascinate Inline~d4|Faster One~d4|Fasthand~d4|Fauna One~r4|Faustina~r8|Federant~d4|Federo~s4|Felipa~h4|Fenix~r4|Festive~h4|Figtree~s9|Finger Paint~d4|Finlandica~s7|Fira Code~m7|Fira Mono~m7|Fira Sans~s9|Fira Sans Condensed~s9|Fira Sans Extra Condensed~s9|Fjalla One~s4|Fjord One~r4|Flamenco~d4|Flavors~d4|Fleur De Leah~h4|Flow Block~d4|Flow Circular~d4|Flow Rounded~d4|Foldit~d9|Fondamento~h4|Fontdiner Swanky~d4|Forum~d4|Fragment Mono~m4|Francois One~s4|Frank Ruhl Libre~r9|Fraunces~r9|Freckle Face~d4|Fredericka the Great~d4|Fredoka~s7|Freehand~d4|Freeman~d4|Fresca~s4|Frijole~d4|Fruktur~d4|Fugaz One~d4|Fuggles~h4|Funnel Display~d8|Funnel Sans~s8|Fustat~sa8|Fuzzy Bubbles~h7|GFS Didot~r4|GFS Neohellenic~s7|Ga Maamli~d4|Gabarito~d9|Gabriela~r4|Gaegu~h7|Gafata~s4|Gajraj One~d4|Galada~d4|Galdeano~s4|Galindo~d4|Gamja Flower~h4|Gantari~s9|Gasoek One~s4|Gayathri~s7|Geist~s9|Geist Mono~m9|Gelasio~r7|Gemunu Libre~s8|Genos~s9|Gentium Book Plus~r7|Gentium Plus~r7|Geo~s4|Geologica~s9|Geom~s9|Georama~s9|Geostar~d4|Geostar Fill~d4|Germania One~d4|Gideon Roman~d4|Gidole~s4|Gidugu~s4|Gilda Display~r4|Girassol~d4|Give You Glory~h4|Glass Antiqua~d4|Glegoo~r7|Gloock~r4|Gloria Hallelujah~h4|Glory~s8|Gluten~d9|Goblin One~d4|Gochi Hand~h4|Goldman~d7|Golos Text~s9|Google Sans~s7|Google Sans Code~m8|Google Sans Flex~s9|Gorditas~d7|Gothic A1~s9|Gotu~s4|Goudy Bookletter 1911~r4|Gowun Batang~r7|Gowun Dodum~s4|Graduate~r4|Grand Hotel~h4|Grandiflora One~r4|Grandstander~d9|Grape Nuts~h4|Gravitas One~d4|Great Vibes~h4|Grechen Fuemen~h4|Grenze~r9|Grenze Gotisch~d9|Grey Qo~h4|Griffy~d4|Gruppo~s4|Gudea~s7|Gugi~d4|Gulzar~ra4|Gupter~r7|Gurajada~s4|Gwendolyn~h7|Habibi~r4|Hachi Maru Pop~h4|Hahmlet~r9|Halant~r7|Hammersmith One~s4|Hanalei~d4|Hanalei Fill~d4|Handjet~da9|Handlee~h4|Hanken Grotesk~s9|Hanuman~r9|Happy Monkey~d4|Harmattan~sa7|Headland One~r4|Hedvig Letters Sans~s4|Hedvig Letters Serif~r4|Heebo~s9|Henny Penny~d4|Hepta Slab~r9|Herr Von Muellerhoff~h4|Hi Melody~h4|Hina Mincho~r4|Hind~s7|Hind Guntur~s7|Hind Madurai~s7|Hind Mysuru~s7|Hind Siliguri~s7|Hind Vadodara~s7|Holtwood One SC~r4|Homemade Apple~h4|Homenaje~s4|Honk~d4|Host Grotesk~s8|Hubballi~s4|Hubot Sans~s9|Huninn~s4|Hurricane~h4|IBM Plex Mono~m7|IBM Plex Sans~s7|IBM Plex Sans Arabic~sa7|IBM Plex Sans Condensed~s7|IBM Plex Sans Devanagari~s7|IBM Plex Sans Hebrew~s7|IBM Plex Sans JP~s7|IBM Plex Sans KR~s7|IBM Plex Sans Thai~s7|IBM Plex Sans Thai Looped~s7|IBM Plex Serif~r7|IM Fell DW Pica~r4|IM Fell DW Pica SC~r4|IM Fell Double Pica~r4|IM Fell Double Pica SC~r4|IM Fell English~r4|IM Fell English SC~r4|IM Fell French Canon~r4|IM Fell French Canon SC~r4|IM Fell Great Primer~r4|IM Fell Great Primer SC~r4|Iansui~h4|Ibarra Real Nova~r7|Iceberg~d4|Iceland~d4|Imbue~r9|Imperial Script~h4|Imprima~s4|Inclusive Sans~s7|Inconsolata~m9|Inder~s4|Indie Flower~h4|Ingrid Darling~h4|Inika~r7|Inknut Antiqua~r9|Inria Sans~s7|Inria Serif~r7|Inspiration~h4|Instrument Sans~s7|Instrument Serif~r4|Intel One Mono~m7|Inter~s9|Inter Tight~s9|Irish Grover~d4|Island Moments~h4|Istok Web~s7|Italiana~s4|Italianno~h4|Itim~h4|Jacquard 12~d4|Jacquard 12 Charted~d4|Jacquard 24~d4|Jacquard 24 Charted~d4|Jacquarda Bastarda 9~d4|Jacquarda Bastarda 9 Charted~d4|Jacques Francois~r4|Jacques Francois Shadow~d4|Jaini~d4|Jaini Purva~d4|Jaldi~s7|Jaro~s4|Jersey 10~d4|Jersey 10 Charted~d4|Jersey 15~d4|Jersey 15 Charted~d4|Jersey 20~d4|Jersey 20 Charted~d4|Jersey 25~d4|Jersey 25 Charted~d4|JetBrains Mono~m8|Jim Nightshade~h4|Joan~r4|Jockey One~s4|Jolly Lodger~d4|Jomhuria~d4|Jomolhari~r4|Josefin Sans~s7|Josefin Slab~r7|Jost~s9|Joti One~d4|Jua~s4|Judson~r7|Julee~h4|Julius Sans One~s4|Junge~r4|Jura~s7|Just Another Hand~h4|Just Me Again Down Here~h4|K2D~s8|Kablammo~d4|Kadwa~r7|Kaisei Decol~r7|Kaisei HarunoUmi~r7|Kaisei Opti~r7|Kaisei Tokumin~r8|Kalam~h7|Kalnia~r7|Kalnia Glaze~d7|Kameron~r7|Kanchenjunga~s7|Kanit~s9|Kantumruy Pro~s7|Kapakana~h4|Karantina~d7|Karla~s8|Karla Tamil Inclined~s7|Karla Tamil Upright~s7|Karma~r7|Katibeh~da4|Kaushan Script~h4|Kavivanar~h4|Kavoon~d4|Kay Pho Du~r7|Kdam Thmor Pro~s4|Keania One~d4|Kedebideri~s9|Kelly Slab~d4|Kenia~d4|Khand~s7|Khmer~s4|Khula~s8|Kings~h4|Kirang Haerang~d4|Kite One~s4|Kiwi Maru~r5|Klee One~h6|Knewave~d4|KoHo~s7|Kodchasan~s7|Kode Mono~m7|Koh Santepheap~r9|Kolker Brush~h4|Konkhmer Sleokchher~d4|Kosugi~s4|Kosugi Maru~s4|Kotta One~r4|Koulen~d4|Kranky~d4|Kreon~r7|Kristi~h4|Krona One~s4|Krub~s7|Kufam~sa9|Kulim Park~s7|Kumar One~d4|Kumar One Outline~d4|Kumbh Sans~s9|Kurale~r4|LXGW Marker Gothic~s4|LXGW WenKai Mono TC~m7|LXGW WenKai TC~h7|La Belle Aurore~h4|Labrada~r9|Lacquer~d4|Laila~r7|Lakki Reddy~h4|Lalezar~sa4|Lancelot~d4|Langar~d4|Lateef~ra8|Lato~s9|Lavishly Yours~h4|League Gothic~s4|League Script~h4|League Spartan~s9|Leckerli One~h4|Ledger~r4|Lekton~m7|Lemon~d4|Lemonada~da7|Lexend~s9|Lexend Deca~s9|Lexend Exa~s9|Lexend Giga~s9|Lexend Mega~s9|Lexend Peta~s9|Lexend Tera~s9|Lexend Zetta~s9|Libertinus Keyboard~d4|Libertinus Math~d4|Libertinus Mono~m4|Libertinus Sans~s7|Libertinus Serif~r7|Libertinus Serif Display~d4|Libre Barcode 128~d4|Libre Barcode 128 Text~d4|Libre Barcode 39~d4|Libre Barcode 39 Extended~d4|Libre Barcode 39 Extended Text~d4|Libre Barcode 39 Text~d4|Libre Barcode EAN13 Text~d4|Libre Baskerville~r7|Libre Bodoni~r7|Libre Caslon Display~r4|Libre Caslon Text~r7|Libre Franklin~s9|Licorice~h4|Life Savers~d8|Lilex~m7|Lilita One~d4|Lily Script One~d4|Limelight~d4|Linden Hill~r4|Linefont~d9|Lisu Bosa~r9|Liter~s4|Literata~r9|Liu Jian Mao Cao~h4|Livvic~s9|Lobster~d4|Lobster Two~d7|Londrina Outline~d4|Londrina Shadow~d4|Londrina Sketch~d4|Londrina Solid~d9|Long Cang~h4|Lora~r7|Love Light~h4|Love Ya Like A Sister~d4|Loved by the King~h4|Lovers Quarrel~h4|Luckiest Guy~d4|Lugrasimo~h4|Lumanosimo~h4|Lunasima~s7|Lusitana~r7|Lustria~r4|Luxurious Roman~d4|Luxurious Script~h4|M PLUS 1~s9|M PLUS 1 Code~m7|M PLUS 1p~s9|M PLUS 2~s9|M PLUS Code Latin~s7|M PLUS Rounded 1c~s9|Ma Shan Zheng~h4|Macondo~d4|Macondo Swash Caps~d4|Mada~sa9|Madimi One~s4|Magra~s7|Maiden Orange~r4|Maitree~r7|Major Mono Display~m4|Mako~s4|Mali~h7|Mallanna~s4|Maname~r4|Mandali~s4|Manjari~s7|Manrope~s8|Mansalva~h4|Manuale~r8|Manufacturing Consent~d4|Marcellus~r4|Marcellus SC~r4|Marck Script~h4|Margarine~d4|Marhey~da7|Markazi Text~ra7|Marko One~r4|Marmelad~s4|Martel~r9|Martel Sans~s9|Martian Mono~m8|Marvel~s7|Matangi~s9|Mate~r4|Mate SC~r4|Matemasie~s4|Material Symbols~m7|Maven Pro~s9|McLaren~d4|Mea Culpa~h4|Meddon~h4|MedievalSharp~d4|Medula One~d4|Meera Inimai~s4|Megrim~d4|Meie Script~h4|Menbere~s7|Meow Script~h4|Merienda~h9|Merriweather~r9|Merriweather Sans~s8|Metal~d4|Metal Mania~d4|Metamorphous~d4|Metrophobic~s4|Michroma~s4|Micro 5~d4|Micro 5 Charted~d4|Milonga~d4|Miltonian~d4|Miltonian Tattoo~d4|Mina~s7|Mingzat~s4|Miniver~d4|Miriam Libre~s7|Mirza~ra7|Miss Fajardose~h4|Mitr~s7|Mochiy Pop One~s4|Mochiy Pop P One~s4|Modak~d4|Modern Antiqua~d4|Moderustic~s8|Mogra~d4|Mohave~s7|Moirai One~d4|Molengo~s4|Molle~h4|Momo Signature~s4|Momo Trust Display~s4|Momo Trust Sans~s8|Mona Sans~s9|Monda~s7|Monofett~m4|Monomakh~d4|Monomaniac One~s4|Monoton~d4|Monsieur La Doulaise~h4|Montaga~r4|Montagu Slab~r7|MonteCarlo~h4|Montez~h4|Montserrat~s9|Montserrat Alternates~s9|Montserrat Underline~s9|Moo Lah Lah~d4|Mooli~s4|Moon Dance~h4|Moul~d4|Moulpali~s4|Mountains of Christmas~d7|Mouse Memoirs~s4|Mozilla Headline~s7|Mozilla Text~s7|Mr Bedfort~h4|Mr Dafoe~h4|Mr De Haviland~h4|Mrs Saint Delafield~h4|Mrs Sheppards~h4|Ms Madi~h4|Mukta~s8|Mukta Mahee~s8|Mukta Malar~s8|Mukta Vaani~s8|Mulish~s9|Murecho~s9|MuseoModerno~d9|My Soul~h4|Mynerve~h4|Mystery Quest~d4|NTR~s4|Nabla~d4|Namdhinggo~r8|Nanum Brush Script~h4|Nanum Gothic~s8|Nanum Gothic Coding~h7|Nanum Myeongjo~r8|Nanum Pen Script~h4|Narnoor~s8|Nata Sans~s9|National Park~s8|Neonderthaw~h4|Nerko One~h4|Neucha~h4|Neuton~r8|New Amsterdam~s4|New Rocker~d4|New Tegomin~r4|News Cycle~s7|Newsreader~r8|Niconne~h4|Niramit~s7|Nixie One~d4|Nobile~s7|Nokora~s9|Norican~h4|Nosifer~d4|Notable~s4|Nothing You Could Do~h4|Noticia Text~r7|Noto Color Emoji~s4|Noto Emoji~s7|Noto Kufi Arabic~sa9|Noto Music~s4|Noto Naskh Arabic~ra7|Noto Nastaliq Urdu~ra7|Noto Rashi Hebrew~r9|Noto Sans~s9|Noto Sans Adlam~s7|Noto Sans Adlam Unjoined~s7|Noto Sans Anatolian Hieroglyphs~s4|Noto Sans Arabic~sa9|Noto Sans Armenian~s9|Noto Sans Avestan~s4|Noto Sans Balinese~s7|Noto Sans Bamum~s7|Noto Sans Bassa Vah~s7|Noto Sans Batak~s4|Noto Sans Bengali~s9|Noto Sans Bhaiksuki~s4|Noto Sans Brahmi~s4|Noto Sans Buginese~s4|Noto Sans Buhid~s4|Noto Sans Canadian Aboriginal~s9|Noto Sans Carian~s4|Noto Sans Caucasian Albanian~s4|Noto Sans Chakma~s4|Noto Sans Cham~s9|Noto Sans Cherokee~s9|Noto Sans Chorasmian~s4|Noto Sans Coptic~s4|Noto Sans Cuneiform~s4|Noto Sans Cypriot~s4|Noto Sans Cypro Minoan~s4|Noto Sans Deseret~s4|Noto Sans Devanagari~s9|Noto Sans Display~s9|Noto Sans Duployan~s7|Noto Sans Egyptian Hieroglyphs~s4|Noto Sans Elbasan~s4|Noto Sans Elymaic~s4|Noto Sans Ethiopic~s9|Noto Sans Georgian~s9|Noto Sans Glagolitic~s4|Noto Sans Gothic~s4|Noto Sans Grantha~s4|Noto Sans Gujarati~s9|Noto Sans Gunjala Gondi~s7|Noto Sans Gurmukhi~s9|Noto Sans HK~s9|Noto Sans Hanifi Rohingya~s7|Noto Sans Hanunoo~s4|Noto Sans Hatran~s4|Noto Sans Hebrew~s9|Noto Sans Imperial Aramaic~s4|Noto Sans Indic Siyaq Numbers~s4|Noto Sans Inscriptional Pahlavi~s4|Noto Sans Inscriptional Parthian~s4|Noto Sans JP~s9|Noto Sans Javanese~s7|Noto Sans KR~s9|Noto Sans Kaithi~s4|Noto Sans Kannada~s9|Noto Sans Kawi~s7|Noto Sans Kayah Li~s7|Noto Sans Kharoshthi~s4|Noto Sans Khmer~s9|Noto Sans Khojki~s4|Noto Sans Khudawadi~s4|Noto Sans Lao~s9|Noto Sans Lao Looped~s9|Noto Sans Lepcha~s4|Noto Sans Limbu~s4|Noto Sans Linear A~s4|Noto Sans Linear B~s4|Noto Sans Lisu~s7|Noto Sans Lycian~s4|Noto Sans Lydian~s4|Noto Sans Mahajani~s4|Noto Sans Malayalam~s9|Noto Sans Mandaic~s4|Noto Sans Manichaean~s4|Noto Sans Marchen~s4|Noto Sans Masaram Gondi~s4|Noto Sans Math~s4|Noto Sans Mayan Numerals~s4|Noto Sans Medefaidrin~s7|Noto Sans Meetei Mayek~s9|Noto Sans Mende Kikakui~s4|Noto Sans Meroitic~s4|Noto Sans Miao~s4|Noto Sans Modi~s4|Noto Sans Mongolian~s4|Noto Sans Mono~s9|Noto Sans Mro~s4|Noto Sans Multani~s4|Noto Sans Myanmar~s9|Noto Sans NKo~s4|Noto Sans NKo Unjoined~s7|Noto Sans Nabataean~s4|Noto Sans Nag Mundari~s7|Noto Sans Nandinagari~s4|Noto Sans New Tai Lue~s7|Noto Sans Newa~s4|Noto Sans Nushu~s4|Noto Sans Ogham~s4|Noto Sans Ol Chiki~s7|Noto Sans Old Hungarian~s4|Noto Sans Old Italic~s4|Noto Sans Old North Arabian~s4|Noto Sans Old Permic~s4|Noto Sans Old Persian~s4|Noto Sans Old Sogdian~s4|Noto Sans Old South Arabian~s4|Noto Sans Old Turkic~s4|Noto Sans Oriya~s9|Noto Sans Osage~s4|Noto Sans Osmanya~s4|Noto Sans Pahawh Hmong~s4|Noto Sans Palmyrene~s4|Noto Sans Pau Cin Hau~s4|Noto Sans PhagsPa~s4|Noto Sans Phoenician~s4|Noto Sans Psalter Pahlavi~s4|Noto Sans Rejang~s4|Noto Sans Runic~s4|Noto Sans SC~s9|Noto Sans Samaritan~s4|Noto Sans Saurashtra~s4|Noto Sans Sharada~s4|Noto Sans Shavian~s4|Noto Sans Siddham~s4|Noto Sans SignWriting~s4|Noto Sans Sinhala~s9|Noto Sans Sogdian~s4|Noto Sans Sora Sompeng~s7|Noto Sans Soyombo~s4|Noto Sans Sundanese~s7|Noto Sans Sunuwar~s4|Noto Sans Syloti Nagri~s4|Noto Sans Symbols~s9|Noto Sans Symbols 2~s4|Noto Sans Syriac~s9|Noto Sans Syriac Eastern~s9|Noto Sans Syriac Western~s9|Noto Sans TC~s9|Noto Sans Tagalog~s4|Noto Sans Tagbanwa~s4|Noto Sans Tai Le~s4|Noto Sans Tai Tham~s7|Noto Sans Tai Viet~s4|Noto Sans Takri~s4|Noto Sans Tamil~s9|Noto Sans Tamil Supplement~s4|Noto Sans Tangsa~s7|Noto Sans Telugu~s9|Noto Sans Thaana~s9|Noto Sans Thai~s9|Noto Sans Thai Looped~s9|Noto Sans Tifinagh~s4|Noto Sans Tirhuta~s4|Noto Sans Ugaritic~s4|Noto Sans Vai~s4|Noto Sans Vithkuqi~s7|Noto Sans Wancho~s4|Noto Sans Warang Citi~s4|Noto Sans Yi~s4|Noto Sans Zanabazar Square~s4|Noto Serif~r9|Noto Serif Ahom~r4|Noto Serif Armenian~r9|Noto Serif Balinese~r4|Noto Serif Bengali~r9|Noto Serif Devanagari~r9|Noto Serif Display~r9|Noto Serif Dives Akuru~r4|Noto Serif Dogra~r4|Noto Serif Ethiopic~r9|Noto Serif Georgian~r9|Noto Serif Grantha~r4|Noto Serif Gujarati~r9|Noto Serif Gurmukhi~r9|Noto Serif HK~r9|Noto Serif Hebrew~r9|Noto Serif Hentaigana~r9|Noto Serif JP~r9|Noto Serif KR~r9|Noto Serif Kannada~r9|Noto Serif Khitan Small Script~r4|Noto Serif Khmer~r9|Noto Serif Khojki~r7|Noto Serif Lao~r9|Noto Serif Makasar~r4|Noto Serif Malayalam~r9|Noto Serif Myanmar~r9|Noto Serif NP Hmong~r7|Noto Serif Old Uyghur~r4|Noto Serif Oriya~r7|Noto Serif Ottoman Siyaq~r4|Noto Serif SC~r9|Noto Serif Sinhala~r9|Noto Serif TC~r9|Noto Serif Tamil~r9|Noto Serif Tangut~r4|Noto Serif Telugu~r9|Noto Serif Thai~r9|Noto Serif Tibetan~r9|Noto Serif Todhri~r4|Noto Serif Toto~r7|Noto Serif Vithkuqi~r7|Noto Serif Yezidi~r7|Noto Traditional Nushu~s7|Noto Znamenny Musical Notation~s4|Nova Cut~d4|Nova Flat~d4|Nova Mono~m4|Nova Oval~d4|Nova Round~d4|Nova Script~d4|Nova Slim~d4|Nova Square~d4|Numans~s4|Nunito~s9|Nunito Sans~s9|Nuosu SIL~s4|Odibee Sans~d4|Odor Mean Chey~r4|Offside~d4|Oi~da4|Ojuju~s8|Old Standard TT~r7|Oldenburg~d4|Ole~h4|Oleo Script~d7|Oleo Script Swash Caps~d7|Onest~s9|Oooh Baby~h4|Open Sans~s8|Oranienbaum~r4|Orbit~s4|Orbitron~s9|Oregano~d4|Orelega One~d4|Orienta~s4|Original Surfer~d4|Oswald~s7|Outfit~s9|Over the Rainbow~h4|Overlock~d9|Overlock SC~d4|Overpass~s9|Overpass Mono~m7|Ovo~r4|Oxanium~d8|Oxygen~s7|Oxygen Mono~m4|PT Mono~m4|PT Sans~s7|PT Sans Caption~s7|PT Sans Narrow~s7|PT Serif~r7|PT Serif Caption~r4|Pacifico~h4|Padauk~s7|Padyakke Expanded One~r4|Palanquin~s7|Palanquin Dark~s7|Palette Mosaic~d4|Pangolin~h4|Paprika~d4|Parastoo~ra7|Parisienne~h4|Parkinsans~s8|Passero One~d4|Passion One~d9|Passions Conflict~h4|Pathway Extreme~s9|Pathway Gothic One~s4|Patrick Hand~h4|Patrick Hand SC~h4|Pattaya~s4|Patua One~d4|Pavanam~s4|Paytone One~s4|Peddana~r4|Peralta~r4|Permanent Marker~h4|Petemoss~h4|Petit Formal Script~h4|Petrona~r9|Phetsarath~s7|Philosopher~s7|Phudu~d9|Piazzolla~r9|Piedra~d4|Pinyon Script~h4|Pirata One~d4|Pixelify Sans~d7|Plaster~d4|Platypi~r8|Play~s7|Playball~d4|Playfair~r9|Playfair Display~r9|Playfair Display SC~r9|Playpen Sans~h8|Playpen Sans Arabic~ha8|Playpen Sans Deva~h8|Playpen Sans Hebrew~h8|Playpen Sans Thai~h8|Playwrite AR~h4|Playwrite AR Guides~h4|Playwrite AT~h4|Playwrite AT Guides~h4|Playwrite AU NSW~h4|Playwrite AU NSW Guides~h4|Playwrite AU QLD~h4|Playwrite AU QLD Guides~h4|Playwrite AU SA~h4|Playwrite AU SA Guides~h4|Playwrite AU TAS~h4|Playwrite AU TAS Guides~h4|Playwrite AU VIC~h4|Playwrite AU VIC Guides~h4|Playwrite BE VLG~h4|Playwrite BE VLG Guides~h4|Playwrite BE WAL~h4|Playwrite BE WAL Guides~h4|Playwrite BR~h4|Playwrite BR Guides~h4|Playwrite CA~h4|Playwrite CA Guides~h4|Playwrite CL~h4|Playwrite CL Guides~h4|Playwrite CO~h4|Playwrite CO Guides~h4|Playwrite CU~h4|Playwrite CU Guides~h4|Playwrite CZ~h4|Playwrite CZ Guides~h4|Playwrite DE Grund~h4|Playwrite DE Grund Guides~h4|Playwrite DE LA~h4|Playwrite DE LA Guides~h4|Playwrite DE SAS~h4|Playwrite DE SAS Guides~h4|Playwrite DE VA~h4|Playwrite DE VA Guides~h4|Playwrite DK Loopet~h4|Playwrite DK Loopet Guides~h4|Playwrite DK Uloopet~h4|Playwrite DK Uloopet Guides~h4|Playwrite ES~h4|Playwrite ES Deco~h4|Playwrite ES Deco Guides~h4|Playwrite ES Guides~h4|Playwrite FR Moderne~h4|Playwrite FR Moderne Guides~h4|Playwrite FR Trad~h4|Playwrite FR Trad Guides~h4|Playwrite GB J~h4|Playwrite GB J Guides~h4|Playwrite GB S~h4|Playwrite GB S Guides~h4|Playwrite HR~h4|Playwrite HR Guides~h4|Playwrite HR Lijeva~h4|Playwrite HR Lijeva Guides~h4|Playwrite HU~h4|Playwrite HU Guides~h4|Playwrite ID~h4|Playwrite ID Guides~h4|Playwrite IE~h4|Playwrite IE Guides~h4|Playwrite IN~h4|Playwrite IN Guides~h4|Playwrite IS~h4|Playwrite IS Guides~h4|Playwrite IT Moderna~h4|Playwrite IT Moderna Guides~h4|Playwrite IT Trad~h4|Playwrite IT Trad Guides~h4|Playwrite MX~h4|Playwrite MX Guides~h4|Playwrite NG Modern~h4|Playwrite NG Modern Guides~h4|Playwrite NL~h4|Playwrite NL Guides~h4|Playwrite NO~h4|Playwrite NO Guides~h4|Playwrite NZ~h4|Playwrite NZ Guides~h4|Playwrite PE~h4|Playwrite PE Guides~h4|Playwrite PL~h4|Playwrite PL Guides~h4|Playwrite PT~h4|Playwrite PT Guides~h4|Playwrite RO~h4|Playwrite RO Guides~h4|Playwrite SK~h4|Playwrite SK Guides~h4|Playwrite TZ~h4|Playwrite TZ Guides~h4|Playwrite US Modern~h4|Playwrite US Modern Guides~h4|Playwrite US Trad~h4|Playwrite US Trad Guides~h4|Playwrite VN~h4|Playwrite VN Guides~h4|Playwrite ZA~h4|Playwrite ZA Guides~h4|Plus Jakarta Sans~s8|Pochaevsk~d4|Podkova~r8|Poetsen One~d4|Poiret One~d4|Poller One~d4|Poltawski Nowy~r7|Poly~r4|Pompiere~d4|Ponnala~d4|Ponomar~d4|Pontano Sans~s7|Poor Story~d4|Poppins~s9|Port Lligat Sans~s4|Port Lligat Slab~r4|Potta One~d4|Pragati Narrow~s7|Praise~h4|Prata~r4|Preahvihear~s4|Press Start 2P~d4|Pridi~r7|Princess Sofia~h4|Prociono~r4|Prompt~s9|Prosto One~d4|Protest Guerrilla~d4|Protest Revolution~d4|Protest Riot~d4|Protest Strike~d4|Proza Libre~s8|Public Sans~s9|Puppies Play~h4|Puritan~s7|Purple Purse~d4|Qahiri~sa4|Quando~r4|Quantico~s7|Quattrocento~r7|Quattrocento Sans~s7|Questrial~s4|Quicksand~s7|Quintessential~h4|Qwigley~h4|Qwitcher Grypen~h7|REM~s9|Racing Sans One~d4|Radio Canada~s7|Radio Canada Big~s7|Radley~r4|Rajdhani~s7|Rakkas~da4|Raleway~s9|Raleway Dots~d4|Ramabhadra~s4|Ramaraja~r4|Rambla~s7|Rammetto One~d4|Rampart One~d4|Ranchers~d4|Rancho~h4|Ranga~d7|Rasa~r7|Rationale~s4|Ravi Prakash~d4|Readex Pro~sa7|Recursive~s9|Red Hat Display~s9|Red Hat Mono~m7|Red Hat Text~s7|Red Rose~d7|Redacted~d4|Redacted Script~d7|Reddit Mono~m9|Reddit Sans~s9|Reddit Sans Condensed~s9|Redressed~h4|Reem Kufi~sa7|Reem Kufi Fun~sa7|Reem Kufi Ink~sa4|Reenie Beanie~h4|Reggae One~d4|Rethink Sans~s8|Revalia~d4|Rhodium Libre~r4|Ribeye~d4|Ribeye Marrow~d4|Righteous~d4|Risque~d4|Road Rage~d4|Roboto~s9|Roboto Condensed~s9|Roboto Flex~s4|Roboto Mono~m7|Roboto Serif~r9|Roboto Slab~r9|Rochester~h4|Rock 3D~d4|Rock Salt~h4|RocknRoll One~s4|Rokkitt~r9|Romanesco~h4|Ropa Sans~s4|Rosario~s7|Rosarivo~r4|Rouge Script~h4|Rowdies~d7|Rozha One~r4|Rubik~sa9|Rubik 80s Fade~d4|Rubik Beastly~d4|Rubik Broken Fax~d4|Rubik Bubbles~d4|Rubik Burned~d4|Rubik Dirt~d4|Rubik Distressed~d4|Rubik Doodle Shadow~d4|Rubik Doodle Triangles~d4|Rubik Gemstones~d4|Rubik Glitch~d4|Rubik Glitch Pop~d4|Rubik Iso~d4|Rubik Lines~d4|Rubik Maps~d4|Rubik Marker Hatch~d4|Rubik Maze~d4|Rubik Microbe~d4|Rubik Mono One~s4|Rubik Moonrocks~d4|Rubik Pixels~d4|Rubik Puddles~d4|Rubik Scribble~d4|Rubik Spray Paint~d4|Rubik Storm~d4|Rubik Vinyl~d4|Rubik Wet Paint~d4|Ruda~s9|Rufina~r7|Ruge Boogie~h4|Ruluko~s4|Rum Raisin~s4|Ruslan Display~d4|Russo One~s4|Ruthie~h4|Ruwudu~ra7|Rye~d4|STIX Two Text~r7|SUSE~s9|SUSE Mono~s8|Sacramento~h4|Sahitya~r7|Sail~d4|Saira~s9|Saira Condensed~s9|Saira Extra Condensed~s9|Saira Semi Condensed~s9|Saira Stencil One~d4|Salsa~d4|Sanchez~r4|Sancreek~d4|Sankofa Display~s4|Sansation~s7|Sansita~s9|Sansita Swashed~d9|Sarabun~s8|Sarala~s7|Sarina~d4|Sarpanch~s9|Sassy Frass~h4|Satisfy~h4|Savate~s9|Sawarabi Gothic~s4|Sawarabi Mincho~r4|Scada~s7|Scheherazade New~ra7|Schibsted Grotesk~s9|Schoolbell~h4|Science Gothic~s9|Scope One~r4|Seaweed Script~d4|Secular One~s4|Sedan~r4|Sedan SC~r4|Sedgwick Ave~h4|Sedgwick Ave Display~h4|Sekuya~d4|Sen~s8|Send Flowers~h4|Sevillana~d4|Seymour One~s4|Shadows Into Light~h4|Shadows Into Light Two~h4|Shafarik~d4|Shalimar~h4|Shantell Sans~d8|Shanti~s4|Share~s7|Share Tech~s4|Share Tech Mono~m4|Shippori Antique~s4|Shippori Antique B1~s4|Shippori Mincho~r8|Shippori Mincho B1~r8|Shizuru~d4|Shojumaru~d4|Short Stack~h4|Shrikhand~d4|Siemreap~s4|Sigmar~d4|Sigmar One~d4|Signika~s7|Signika Negative~s7|Silkscreen~d7|Simonetta~d9|Single Day~d4|Sintony~s7|Sirin Stencil~d4|Sirivennela~s4|Six Caps~s4|Sixtyfour~m4|Sixtyfour Convergence~m4|Skranji~d7|Slabo 13px~r4|Slabo 27px~r4|Slackey~d4|Slackside One~h4|Smokum~d4|Smooch~h4|Smooch Sans~s9|Smythe~d4|Sniglet~d8|Snippet~s4|Snowburst One~d4|Sofadi One~d4|Sofia~h4|Sofia Sans~s9|Sofia Sans Condensed~s9|Sofia Sans Extra Condensed~s9|Sofia Sans Semi Condensed~s9|Solitreo~h4|Solway~r8|Sometype Mono~m7|Song Myung~r4|Sono~s8|Sonsie One~d4|Sora~s8|Sorts Mill Goudy~r4|Sour Gummy~s9|Source Code Pro~m9|Source Sans 3~s9|Source Serif 4~r9|Space Grotesk~s7|Space Mono~m7|Special Elite~d4|Special Gothic~s7|Special Gothic Condensed One~s4|Special Gothic Expanded One~s4|Spectral~r8|Spectral SC~r8|Spicy Rice~d4|Spinnaker~s4|Spirax~d4|Splash~h4|Spline Sans~s7|Spline Sans Mono~m7|Squada One~d4|Square Peg~h4|Sree Krushnadevaraya~r4|Sriracha~h4|Srisakdi~d7|Staatliches~d4|Stack Sans Headline~s7|Stack Sans Notch~s7|Stack Sans Text~s7|Stalemate~h4|Stalinist One~d4|Stardos Stencil~d7|Stick~s4|Stick No Bills~s8|Stint Ultra Condensed~r4|Stint Ultra Expanded~r4|Stoke~r4|Story Script~s4|Strait~s4|Style Script~h4|Stylish~s4|Sue Ellen Francisco~h4|Suez One~r4|Sulphur Point~s7|Sumana~r7|Sunflower~s7|Sunshiney~h4|Supermercado One~d4|Sura~r7|Suranna~r4|Suravaram~r4|Suwannaphum~r9|Swanky and Moo Moo~h4|Syncopate~s7|Syne~s8|Syne Mono~m4|Syne Tactile~d4|TASA Explorer~s8|TASA Orbiter~s8|Tac One~s4|Tagesschrift~d4|Tai Heritage Pro~r7|Tajawal~sa9|Tangerine~h7|Tapestry~h4|Taprom~d4|Tauri~s4|Taviraj~r9|Teachers~s8|Teko~s7|Tektur~d9|Telex~s4|Tenali Ramakrishna~s4|Tenor Sans~s4|Text Me One~s4|Texturina~r9|Thasadith~s7|The Girl Next Door~h4|The Nautigal~h7|Tienne~r9|TikTok Sans~s9|Tillana~d8|Tilt Neon~d4|Tilt Prism~d4|Tilt Warp~d4|Timmana~s4|Tinos~r7|Tiny5~s4|Tiro Bangla~r4|Tiro Devanagari Hindi~r4|Tiro Devanagari Marathi~r4|Tiro Devanagari Sanskrit~r4|Tiro Gurmukhi~r4|Tiro Kannada~r4|Tiro Tamil~r4|Tiro Telugu~r4|Tirra~s9|Titan One~d4|Titillium Web~s9|Tomorrow~s9|Tourney~d9|Trade Winds~d4|Train One~d4|Triodion~d4|Trirong~r9|Trispace~s8|Trocchi~r4|Trochut~d7|Truculenta~s9|Trykker~r4|Tsukimi Rounded~s7|Tuffy~s7|Tulpen One~d4|Turret Road~d8|Twinkle Star~h4|Ubuntu~s7|Ubuntu Condensed~s4|Ubuntu Mono~m7|Ubuntu Sans~s8|Ubuntu Sans Mono~m7|Uchen~r4|Ultra~r4|Unbounded~s9|Uncial Antiqua~d4|Underdog~d4|Unica One~d4|UnifrakturCook~d7|UnifrakturMaguntia~d4|Unkempt~d7|Unlock~d4|Unna~r7|UoqMunThenKhung~r4|Updock~h4|Urbanist~s9|VT323~m4|Vampiro One~d4|Varela~s4|Varela Round~s4|Varta~s7|Vast Shadow~r4|Vazirmatn~sa9|Vend Sans~s7|Vesper Libre~r9|Viaoda Libre~d4|Vibes~da4|Vibur~h4|Victor Mono~m7|Vidaloka~r4|Viga~s4|Vina Sans~d4|Voces~s4|Volkhov~r7|Vollkorn~r9|Vollkorn SC~r9|Voltaire~s4|Vujahday Script~h4|WDXL Lubrifont JP N~s4|WDXL Lubrifont SC~s4|WDXL Lubrifont TC~s4|Waiting for the Sunrise~h4|Wallpoet~d4|Walter Turncoat~h4|Warnes~d4|Water Brush~h4|Waterfall~h4|Wavefont~d9|Wellfleet~r4|Wendy One~s4|Whisper~h4|WindSong~h5|Winky Rough~s9|Winky Sans~s9|Wire One~s4|Wittgenstein~r9|Wix Madefor Display~s8|Wix Madefor Text~s8|Work Sans~s9|Workbench~m4|Xanh Mono~m4|Yaldevi~s7|Yanone Kaffeesatz~s7|Yantramanav~s9|Yarndings 12~d4|Yarndings 12 Charted~d4|Yarndings 20~d4|Yarndings 20 Charted~d4|Yatra One~d4|Yellowtail~h4|Yeon Sung~d4|Yeseva One~d4|Yesteryear~h4|Yomogi~h4|Young Serif~r4|Yrsa~r7|Ysabeau~s9|Ysabeau Infant~s9|Ysabeau Office~s9|Ysabeau SC~s9|Yuji Boku~r4|Yuji Hentaigana Akari~h4|Yuji Hentaigana Akebono~h4|Yuji Mai~r4|Yuji Syuku~r4|Yusei Magic~s4|ZCOOL KuaiLe~s4|ZCOOL QingKe HuangYou~s4|ZCOOL XiaoWei~s4|Zain~sa9|Zalando Sans~s9|Zalando Sans Expanded~s9|Zalando Sans SemiExpanded~s9|Zen Antique~r4|Zen Antique Soft~r4|Zen Dots~d4|Zen Kaku Gothic Antique~s9|Zen Kaku Gothic New~s9|Zen Kurenaido~s4|Zen Loop~d4|Zen Maru Gothic~s9|Zen Old Mincho~r9|Zen Tokyo Zoo~d4|Zeyada~h4|Zhi Mang Xing~h4|Zilla Slab~r7|Zilla Slab Highlight~r7";
+const ALLF=FONTLIST.split('|').map(t=>{const [n,c]=t.split('~');return{name:n,cat:c[0],ar:c.includes('a'),w:(+c.slice(-1)||4)*100}});
+const OLDF={archivo:'Archivo Black',anton:'Anton',bebas:'Bebas Neue',oswald:'Oswald',montserrat:'Montserrat',poppins:'Poppins',russo:'Russo One',righteous:'Righteous',playfair:'Playfair Display',slab:'Roboto Slab'};
+const FEAT=['Archivo Black','Anton','Bebas Neue','Oswald','Montserrat','Poppins','Russo One','Righteous','Playfair Display','Roboto Slab','Teko','Barlow Condensed','Fjalla One','Alfa Slab One','Abril Fatface','Bungee','Staatliches','Black Ops One','Bangers','Lobster','Pacifico','Dancing Script','Great Vibes','Satisfy','Permanent Marker','Cinzel','Orbitron','Audiowide','Exo 2','Kanit','Rubik','Nunito','Raleway','Lato','Roboto','Open Sans','Merriweather','Noto Nastaliq Urdu','Lalezar','Cairo','Changa','Archivo'];
+const fByName=n=>ALLF.find(f=>f.name===n);
+function curFont(){return fByName(OLDF[brand.headFont]||brand.headFont)||fByName('Archivo Black')||{name:'Archivo Black',w:400,cat:'s'}}
+const loaded=new Set(['Archivo Black','Archivo','JetBrains Mono']);
+function loadFont(f){if(!f||loaded.has(f.name))return;loaded.add(f.name);const l=document.createElement('link');l.rel='stylesheet';
+  l.href='https://fonts.googleapis.com/css2?family='+encodeURIComponent(f.name).replace(/%20/g,'+')+(f.w!==400?':wght@'+f.w:'')+'&display=swap';document.head.appendChild(l)}
+function applyFont(){const f=curFont();loadFont(f);document.documentElement.style.setProperty('--f-display',`"${f.name}","Arial Black",Impact,sans-serif`);document.documentElement.style.setProperty('--dw',f.w)}
+let fontShown=48;const FCATN={s:'Sans serif',r:'Serif',d:'Display',h:'Handwriting',m:'Monospace'};
+function fontMatches(){const q=$('#fontQ').value.trim().toLowerCase(),c=$('#fontCat').value;
+  let l=ALLF.filter(f=>(!q||f.name.toLowerCase().includes(q))&&(!c||(c==='a'?f.ar:f.cat===c)));
+  if(!q&&!c){const fe=FEAT.map(fByName).filter(Boolean);l=[...fe,...l.filter(f=>!FEAT.includes(f.name))]}
+  return l}
+function renderFonts(){
+  const sample=$('#fontSample').value.trim()||brand.company||brand.pcName||'Al Qadir Traders';const cur=curFont().name;
+  const l=fontMatches(),show=l.slice(0,fontShown);show.forEach(loadFont);
+  $('#fontCur').textContent=cur;
+  $('#fontCount').textContent=l.length?`Showing ${show.length} of ${nf0.format(l.length)} fonts${l.length<ALLF.length?' (filtered)':''}`:'No font matches — try another name or style';
+  $('#fontGrid').innerHTML=show.map(f=>`<button type="button" class="fontopt" data-font="${esc(f.name)}" aria-pressed="${f.name===cur}"><span class="pv" style="font-family:'${f.name}',sans-serif;font-weight:${f.w}">${esc(sample)}</span><small>${esc(f.name)} · ${f.ar?'Urdu/Arabic':FCATN[f.cat]}${f.name==='Archivo Black'?' · default':''}</small></button>`).join('');
+  $('#fontMore').hidden=l.length<=fontShown;
+}
 $('#fontGrid').addEventListener('click',e=>{const b=e.target.closest('.fontopt');if(!b)return;brand.headFont=b.dataset.font;applyFont();renderFonts();markDirty();toast(curFont().name+' selected — press Save settings')});
-$('#tab-st').addEventListener('click',()=>{loadFonts(FONTS);renderFonts()});
+let fontT;$('#fontQ').addEventListener('input',()=>{clearTimeout(fontT);fontT=setTimeout(()=>{fontShown=48;renderFonts()},200)});
+$('#fontCat').addEventListener('change',()=>{fontShown=48;renderFonts()});
+$('#fontSample').addEventListener('input',()=>{const t=$('#fontSample').value.trim()||brand.company||'Al Qadir Traders';document.querySelectorAll('#fontGrid .pv').forEach(e=>e.textContent=t)});
+$('#fontMore').onclick=()=>{fontShown+=48;renderFonts()};
+$('#tab-st').addEventListener('click',renderFonts);
+
+/* movable header: logo, names and date */
+const LAYDEF={logo:{x:0,y:4,s:1},name:{x:15,y:24,s:1},pclogo:{x:80,y:0,s:1},pcname:{x:56,y:6,s:1},date:{x:84,y:66,s:1}};
+const LNAME={logo:'Your logo',name:'Your name',pclogo:'Company logo',pcname:'Company name',date:'Date'};
+const lay=()=>{const L={};for(const k in LAYDEF)L[k]=Object.assign({},LAYDEF[k],(brand.layout||{})[k]||{});return L};
+function applyLayout(){const L=lay();document.querySelectorAll('.lay .el').forEach(el=>{const p=L[el.dataset.el];if(!p)return;el.style.left=p.x+'%';el.style.top=p.y+'%';el.style.setProperty('--s',p.s)});requestAnimationFrame(fitLayout)}
+/* keep every item inside the header even if a logo is wider than expected */
+function fitLayout(){document.querySelectorAll('.lay').forEach(h=>{const W=h.clientWidth,H=h.clientHeight;if(!W)return;h.querySelectorAll('.el').forEach(el=>{
+  if(el.offsetLeft+el.offsetWidth>W+1)el.style.left=Math.max(0,(W-el.offsetWidth)/W*100)+'%';if(el.offsetTop+el.offsetHeight>H+1)el.style.top=Math.max(0,(H-el.offsetHeight)/H*100)+'%'})})}
+window.addEventListener('resize',()=>applyLayout());document.addEventListener('load',e=>{if(e.target.closest&&e.target.closest('.lay'))fitLayout()},true);
+let layEdit=false,laySel=null;
+function setPos(id,patch){brand.layout=Object.assign({},brand.layout||{});brand.layout[id]=Object.assign({},lay()[id],patch);applyLayout()}
+function layStatus(){document.querySelectorAll('.lsel').forEach(b=>b.textContent=laySel?LNAME[laySel]+' · size '+Math.round(lay()[laySel].s*100)+'%':'tap an item');
+  document.querySelectorAll('.lay .el').forEach(e=>e.classList.toggle('sel',e.dataset.el===laySel))}
+function setLayEdit(on){layEdit=on;document.querySelectorAll('.lay').forEach(h=>h.classList.toggle('editing',on));document.querySelectorAll('.laybar').forEach(b=>b.hidden=!on);
+  if(!on){laySel=null;saveBrand();toast('Layout saved')}layStatus();
+  if(on){const sh=document.querySelector('.panel:not([hidden]) .laybar');if(sh)sh.scrollIntoView({behavior:'smooth',block:'start'})}}
+$('#rlLay').onclick=$('#srLay').onclick=()=>setLayEdit(!layEdit);
+document.querySelectorAll('.ldone').forEach(b=>b.onclick=()=>setLayEdit(false));
+document.querySelectorAll('.lreset').forEach(b=>b.onclick=()=>{brand.layout={};applyLayout();layStatus();toast('Layout reset')});
+document.querySelectorAll('.lsz').forEach(b=>b.onclick=()=>{if(!laySel){toast('Tap an item first');return}const s0=lay()[laySel].s;setPos(laySel,{s:Math.round(Math.max(.4,Math.min(3,s0+(+b.dataset.d)*.1))*10)/10});layStatus()});
+document.addEventListener('pointerdown',e=>{
+  if(!layEdit)return;const el=e.target.closest('.lay .el');if(!el)return;e.preventDefault();
+  laySel=el.dataset.el;layStatus();
+  const head=el.parentElement,r=head.getBoundingClientRect(),er=el.getBoundingClientRect(),ox=e.clientX-er.left,oy=e.clientY-er.top;
+  const mw=er.width/r.width*100,mh=er.height/r.height*100;
+  try{el.setPointerCapture(e.pointerId)}catch(x){}
+  const move=ev=>{let x=(ev.clientX-ox-r.left)/r.width*100,y=(ev.clientY-oy-r.top)/r.height*100;
+    x=Math.round(Math.max(0,Math.min(100-mw,x))*2)/2;y=Math.round(Math.max(0,Math.min(Math.max(0,100-mh),y))*2)/2;setPos(laySel,{x,y})};
+  const up=()=>{el.removeEventListener('pointermove',move);el.removeEventListener('pointerup',up);el.removeEventListener('pointercancel',up)};
+  el.addEventListener('pointermove',move);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
+});
+document.addEventListener('keydown',e=>{if(!layEdit||!laySel)return;const d={ArrowLeft:[-.5,0],ArrowRight:[.5,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];if(!d)return;e.preventDefault();const p=lay()[laySel];setPos(laySel,{x:Math.max(0,p.x+d[0]),y:Math.max(0,p.y+d[1])})});
+
+/* PDF header drawn from the same layout and font */
+async function headerImage(kind,bandTitle,bandRight){
+  const PX=8,Wm=186,Hm=40,Bm=10.4,cv=document.createElement('canvas');cv.width=Wm*PX;cv.height=(Hm+Bm)*PX;const c=cv.getContext('2d');
+  c.fillStyle='#fff';c.fillRect(0,0,cv.width,cv.height);
+  const f=curFont(),HF=`"${f.name}","Arial Black",sans-serif`,mm=v=>v*PX,pt=v=>v*0.2646*PX;
+  try{await Promise.all([document.fonts.load(`${f.w} 40px "${f.name}"`),document.fonts.load('600 20px "Archivo"'),document.fonts.load('800 20px "Archivo"'),document.fonts.load('800 20px "JetBrains Mono"')])}catch(e){}
+  const L=lay(),at=id=>({x:L[id].x/100*Wm*PX,y:L[id].y/100*Hm*PX,s:L[id].s});
+  const img=src=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src});
+  const pic=async(src,id,hmm,maxw)=>{if(!src)return;const i=await img(src);if(!i)return;const p=at(id);let h=mm(hmm*p.s),w=i.width/i.height*h;if(w>mm(maxw*p.s)){w=mm(maxw*p.s);h=w*i.height/i.width}c.drawImage(i,Math.min(p.x,cv.width-w),Math.min(p.y,mm(Hm)-h),w,h)};
+  const tx=(t,x,y)=>{const w=c.measureText(t).width;c.fillText(t,Math.max(0,Math.min(x,cv.width-w)),y)};
+  c.textBaseline='top';
+  await pic(brand.logo,'logo',22,48);await pic(brand.pcLogo,'pclogo',14,40);
+  let p=at('name');c.fillStyle='#141216';c.font=`${f.w} ${pt(26*p.s)}px ${HF}`;tx((brand.company||'Your Company').toUpperCase(),p.x,p.y);
+  if(brand.sub){c.fillStyle='#5f565a';c.font=`600 ${pt(13*p.s)}px "Archivo",sans-serif`;tx(brand.sub,p.x,p.y+pt(26*p.s)*1.1+pt(4*p.s))}
+  if(brand.pcName){p=at('pcname');c.fillStyle='#5f565a';c.font=`800 ${pt(10*p.s)}px "Archivo",sans-serif`;try{c.letterSpacing=pt(.8*p.s)+'px'}catch(e){}
+    tx((kind==='sr'?'STOCK OF':'RATE LIST OF'),p.x,p.y);try{c.letterSpacing='0px'}catch(e){}
+    c.fillStyle='#141216';c.font=`${f.w} ${pt(17*p.s)}px ${HF}`;tx(brand.pcName.toUpperCase(),p.x,p.y+pt(10*p.s)*1.2+2)}
+  p=at('date');c.fillStyle='#5f565a';c.font=`600 ${pt(12*p.s)}px "Archivo",sans-serif`;tx(kind==='sr'?'Report date':'Updated',p.x,p.y);
+  c.fillStyle='#141216';c.font=`800 ${pt(15*p.s)}px "JetBrains Mono",monospace`;tx(kind==='sr'?fmtDate(report&&report.date):fmtDate(listDate()),p.x,p.y+pt(12*p.s)*1.25);
+  const by=mm(Hm);c.fillStyle='#d0202b';c.fillRect(0,by,cv.width,mm(9));c.fillStyle='#141216';c.fillRect(0,by+mm(9),cv.width,mm(1.2));
+  c.textBaseline='middle';c.fillStyle='#fff';c.font=`${f.w} ${pt(16)}px ${HF}`;try{c.letterSpacing=pt(1)+'px'}catch(e){}c.fillText(bandTitle.toUpperCase(),mm(4),by+mm(4.6));try{c.letterSpacing='0px'}catch(e){}
+  c.font=`800 ${pt(11.5)}px "Archivo",sans-serif`;c.textAlign='right';c.fillText(bandRight,cv.width-mm(4),by+mm(4.6));
+  return{url:cv.toDataURL('image/png'),h:Hm+Bm};
+}
 const fillBrand=()=>{$('#bPcName').value=brand.pcName||'';$('#bCo').value=brand.company||'';$('#bSub').value=brand.sub||'';$('#bTitle').value=brand.listTitle||'';$('#bFoot').value=brand.foot||''};
 fillBrand();
 [['bCo','company'],['bSub','sub'],['bTitle','listTitle'],['bFoot','foot'],['bPcName','pcName']].forEach(([id,k])=>$('#'+id).addEventListener('input',e=>{brand[k]=e.target.value;markDirty();renderBrand();renderList()}));
-document.querySelectorAll('.brand-logo').forEach(el=>el.addEventListener('click',()=>{if(!brand.logo)$('#logoFile').click()}));
+document.addEventListener('click',e=>{if(!layEdit&&e.target.closest('.logo-empty'))$('#logoFile').click()});
 $('#logoPick').onclick=()=>$('#logoFile').click();$('#logoDel').onclick=()=>{brand.logo='';markDirty();renderBrand();toast('Logo removed — press Save settings')};
 $('#logoFile').onchange=e=>{const f=e.target.files[0];if(!f)return;e.target.value='';const rd=new FileReader();rd.onload=()=>{const img=new Image();img.onload=()=>{
   const sc=Math.min(1,360/Math.max(img.width,img.height)),cv=document.createElement('canvas');cv.width=Math.round(img.width*sc);cv.height=Math.round(img.height*sc);
@@ -927,6 +1085,8 @@ const Cloud={
 };
 function authErr(e){const m={'auth/invalid-credential':'Wrong email or password','auth/wrong-password':'Wrong password','auth/user-not-found':'No account with this email — press Create account','auth/email-already-in-use':'This email already has an account — press Sign in','auth/weak-password':'Password must be at least 6 characters','auth/invalid-email':'That email address is not valid','auth/unauthorized-domain':'This website is not in Firebase “Authorized domains”','auth/operation-not-allowed':'Turn on Email/Password in Firebase Authentication','auth/network-request-failed':'No internet connection'};toast(m[e.code]||e.message||'Sign-in failed')}
 const creds=()=>[$('#fbEmail').value.trim(),$('#fbPass').value];
+const EYE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',EYEOFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.6 5.1A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2M6.6 6.6C3.8 8.4 2 12 2 12s3.6 7 10 7a10.4 10.4 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2M2 2l20 20"/></svg>';$('#fbEye').innerHTML=EYE;
+$('#fbEye').onclick=()=>{const i=$('#fbPass'),show=i.type==='password';i.type=show?'text':'password';$('#fbEye').innerHTML=show?EYEOFF:EYE;$('#fbEye').setAttribute('aria-label',show?'Hide password':'Show password');$('#fbEye').title=show?'Hide password':'Show password';i.focus()};
 $('#fbIn').onclick=()=>{if(!Cloud.auth){toast('Connect Firebase first (step 1)');return}const [a,b]=creds();Cloud.auth.signInWithEmailAndPassword(a,b).then(()=>toast('Signed in')).catch(authErr)};
 $('#fbUp').onclick=()=>{if(!Cloud.auth){toast('Connect Firebase first (step 1)');return}const [a,b]=creds();Cloud.auth.createUserWithEmailAndPassword(a,b).then(()=>toast('Account created and signed in')).catch(authErr)};
 $('#fbReset').onclick=()=>{if(!Cloud.auth){toast('Connect Firebase first (step 1)');return}const a=creds()[0];if(!a){toast('Type your email first');return}Cloud.auth.sendPasswordResetEmail(a).then(()=>toast('Password reset email sent')).catch(authErr)};
