@@ -258,6 +258,13 @@ table.ph-off .ph{opacity:.35}
 .pw{position:relative;margin-top:8px}.pw .inp{padding-right:46px}
 .eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:none;width:38px;height:34px;cursor:pointer;color:var(--muted);display:grid;place-items:center;border-radius:6px}
 .eye:hover{color:var(--ink);background:var(--surface-2)}.eye svg{width:20px;height:20px}
+.verify{display:flex;gap:12px 28px;flex-wrap:wrap;align-items:center;margin-top:12px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--muted);border-radius:10px;padding:12px 16px}
+.verify.ok{border-left-color:var(--good)}.verify.bad{border-left-color:var(--bad)}
+.verify small{display:block;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.verify b{display:block;font-family:var(--f-mono);font-size:17px;font-weight:800}
+.verify span{font-size:12px;color:var(--muted);font-weight:600}
+.verify .vres{margin-left:auto;font-weight:800}.verify.ok .vres{color:var(--good)}.verify.bad .vres{color:var(--bad)}
+.rep td.rawc{background:color-mix(in srgb,var(--navy) 6%,transparent);font-weight:800;color:var(--navy)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--head-bg);color:var(--head-fg);padding:10px 18px;border-radius:9px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.2s;z-index:20;max-width:calc(100% - 32px)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -294,7 +301,7 @@ table.ph-off .ph{opacity:.35}
   <div class="wrap">
     <div class="brand">
       <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg></div>
-      <div><h1>CARTON RATE LIST<span class="ver">v3.4</span></h1><small>Carton rate · Piece rate · Packing</small></div>
+      <div><h1>CARTON RATE LIST<span class="ver">v3.5</span></h1><small>Carton rate · Piece rate · Packing</small></div>
     </div>
     <button class="cloudpill" id="cloudPill" data-st="off" type="button" title="Cloud sync"><i></i><span id="cloudTxt">Cloud off</span></button>
     <nav class="tabs" role="tablist">
@@ -381,6 +388,7 @@ table.ph-off .ph{opacity:.35}
     <div class="tile"><div class="lbl">Stock value</div><div class="val" id="sAmt">0</div><div class="sub">at purchase price</div></div>
     <div class="tile warn"><div class="lbl">Packing missing</div><div class="val" id="sMiss">0</div><div class="sub">products with stock</div></div>
   </div>
+  <div class="verify" id="srVerify" hidden></div>
   <div class="toolbar">
     <div class="field search"><input id="sq" placeholder="Search products" aria-label="Search stock"></div>
     <div class="seg" id="segSr" role="group" aria-label="Order"><button type="button" data-v="file">Report order</button><button type="button" data-v="cat">Category-wise</button><button type="button" data-v="name">A–Z</button></div><input type="hidden" id="ssort" value="cat">
@@ -405,7 +413,7 @@ table.ph-off .ph{opacity:.35}
     <div class="tape"><span>Stock Report · Carton-wise</span><small id="srCount"></small></div>
     <div class="tbl-wrap">
       <table class="rep">
-        <thead><tr><th>#</th><th>Product</th><th class="num">Packing<small>pcs / ctn</small></th><th class="num">Stock<small>pieces</small></th><th class="num">Cartons</th><th class="num">Loose<small>pcs</small></th><th class="num">Rate<small>per piece</small></th><th class="num">Amount<small>Rs</small></th></tr></thead>
+        <thead><tr><th>#</th><th>Product</th><th class="num rawc">In report<small>as uploaded</small></th><th class="num">Packing<small>pcs / ctn</small></th><th class="num">Stock<small>pieces</small></th><th class="num">Cartons</th><th class="num">Loose<small>pcs</small></th><th class="num">Rate<small>per piece</small></th><th class="num">Amount<small>Rs</small></th></tr></thead>
         <tbody id="srBody"></tbody><tfoot id="srFoot"></tfoot>
       </table>
     </div>
@@ -504,7 +512,7 @@ service cloud.firestore {
   <div class="savebar" id="saveBar"><span class="st" id="saveSt">All settings saved</span><button class="btn" id="bDiscard">Undo changes</button><button class="btn red" id="bSave">Save settings</button></div>
 </section>
 
-<footer class="appfoot no-print"><span><b>FATIMA-TECH</b> · Carton Rate List v3.4</span><span>Saved in this browser · make a backup from Settings</span></footer>
+<footer class="appfoot no-print"><span><b>FATIMA-TECH</b> · Carton Rate List v3.5</span><span>Saved in this browser · make a backup from Settings</span></footer>
 </main>
 <div class="toast" id="toast" role="status"></div>
 
@@ -779,9 +787,11 @@ function parseWorkbook(wb,fileName){
     const cC=fi(/categ|group|brand/i),cS=fi(/stock|qty|quantity/i,/value|amount|price|rate/i),cV=fi(/value|amount/i);if(cS<0)continue;
     let date=null;for(let i=0;i<hi;i++)(rows[i]||[]).forEach(c=>{if(!date&&c instanceof Date)date=new Date(c.getTime()+12*3600e3).toISOString().slice(0,10)});
     const out=[];
-    for(let i=hi+1;i<rows.length;i++){const r=rows[i];if(!r)continue;const name=r[cN];if(name==null||!String(name).trim()||/^total/i.test(String(name).trim()))continue;
-      const sv=r[cS];out.push({name:String(name).trim(),cat:cC>=0&&r[cC]?String(r[cC]).trim():'',qty:parseNum(sv),unit:/ctn|carton/i.test(String(sv))?'ctn':'pc',value:cV>=0?parseMoney(r[cV]):0})}
-    if(out.length)return{date:date||today(),file:fileName,rows:out};
+    let fileTotal=null;
+    for(let i=hi+1;i<rows.length;i++){const r=rows[i];if(!r)continue;const name=r[cN];
+      if(name==null||!String(name).trim()||/^total/i.test(String(name).trim())){if(r[cS]!=null&&r[cS]!==''&&!fileTotal)fileTotal={qty:parseNum(r[cS]),value:cV>=0?parseMoney(r[cV]):0};continue}
+      const sv=r[cS];out.push({raw:String(sv??'').trim(),name:String(name).trim(),cat:cC>=0&&r[cC]?String(r[cC]).trim():'',qty:parseNum(sv),unit:/ctn|carton/i.test(String(sv))?'ctn':'pc',value:cV>=0?parseMoney(r[cV]):0})}
+    if(out.length)return{date:date||today(),file:fileName,rows:out,fileTotal};
   }
   throw new Error('No “Product” and “Stock” columns found in this file.');
 }
@@ -797,28 +807,39 @@ function srCalc(r){const m=master[keyOf(r.name)]||{};const P=okP(m)||0;
   if(r.unit==='ctn')return{P:0,pcs:null,ctn:r.qty,loose:null,rpc:null,amt:r.value,isCtn:true};
   const pcs=r.qty;let ctn=null,loose=null;if(P){const a=Math.abs(pcs),s=pcs<0?-1:1,f=Math.floor(a/P+1e-9);ctn=s*f;loose=s*(a-f*P)}
   return{P,pcs,ctn,loose,rpc:pcs>0&&r.value>0?r.value/pcs:null,amt:r.value}}
+const rawOf=r=>r.raw||(fQ(r.qty)+' '+(r.unit==='ctn'?'Ctn':'Pc(s)'));
+function fQ(v){return Number.isInteger(+v)?nf0.format(v):nf2.format(v)}
+function renderVerify(){
+  const el=$('#srVerify');if(!report){el.hidden=true;return}el.hidden=false;
+  const sq=report.rows.reduce((s,r)=>s+(+r.qty||0),0),sv=report.rows.reduce((s,r)=>s+(+r.value||0),0);
+  const pcs=report.rows.filter(r=>r.unit!=='ctn').reduce((s,r)=>s+(+r.qty||0),0),ctn=report.rows.filter(r=>r.unit==='ctn').reduce((s,r)=>s+(+r.qty||0),0);
+  const ft=report.fileTotal;const ok=ft&&Math.abs(ft.qty-sq)<.01&&Math.abs(ft.value-sv)<1;
+  el.className='verify'+(ft?(ok?' ok':' bad'):'');
+  el.innerHTML=`<div><small>Stock as written in your report</small><b>${nf0.format(pcs)} Pc(s) + ${nf0.format(ctn)} Ctn</b><span>${report.rows.length} products · Rs ${nf2.format(sv)}</span></div>`+
+    (ft?`<div><small>Total row in the file</small><b>${fQ(ft.qty)}</b><span>Rs ${nf2.format(ft.value)}</span></div><div class="vres">${ok?'✓ Matches the file total':'⚠ Does not match the file total — check the report'}</div>`:'<div class="vres">The file has no total row to compare with</div>');
+}
 function renderStock(){
   const body=$('#srBody');
-  if(!report){body.innerHTML='<tr class="empty-row"><td colspan="8"><b>No stock report yet</b>Upload one above — pieces will be turned into cartons with your saved packing.</td></tr>';$('#srFoot').innerHTML='';['sCtn','sLoose','sAmt','sMiss'].forEach(id=>$('#'+id).textContent='0');$('#srDate').textContent='—';$('#srDateIn').value='';$('#srCount').textContent='';return}
+  if(!report){body.innerHTML='<tr class="empty-row"><td colspan="9"><b>No stock report yet</b>Upload one above — pieces will be turned into cartons with your saved packing.</td></tr>';$('#srFoot').innerHTML='';['sCtn','sLoose','sAmt','sMiss'].forEach(id=>$('#'+id).textContent='0');$('#srDate').textContent='—';$('#srDateIn').value='';$('#srCount').textContent='';renderVerify();return}
   const q=$('#sq').value.trim().toUpperCase(),hz=$('#sHideZero').checked;
   const so=$('#ssort').value,catOf=r=>r.cat||(master[keyOf(r.name)]||{}).cat||'Other';
   const rows=report.rows.filter(r=>(!q||r.name.toUpperCase().includes(q))&&(!hz||r.qty!==0));
   if(so==='name')rows.sort((a,b)=>a.name.localeCompare(b.name));
   if(so==='cat')rows.sort((a,b)=>catOf(a).localeCompare(catOf(b))||a.name.localeCompare(b.name));
-  const t={ctn:0,loose:0,pcs:0,amt:0};let g=null,gt=null;const out=[];
-  const flush=()=>{if(g!==null&&so==='cat')out.push(`<tr class="sub"><td colspan="3" style="text-align:right">${esc(g)} total</td><td class="num">${nf0.format(gt.pcs)}</td><td class="num hot">${nf0.format(gt.ctn)}</td><td class="num">${nf0.format(gt.loose)}</td><td></td><td class="num">${nf2.format(gt.amt)}</td></tr>`)};
+  const t={ctn:0,loose:0,pcs:0,amt:0,raw:0};let g=null,gt=null;const out=[];
+  const flush=()=>{if(g!==null&&so==='cat')out.push(`<tr class="sub"><td colspan="2" style="text-align:right">${esc(g)} total</td><td class="num rawc">${fQ(gt.raw)}</td><td></td><td class="num">${nf0.format(gt.pcs)}</td><td class="num hot">${nf0.format(gt.ctn)}</td><td class="num">${nf0.format(gt.loose)}</td><td></td><td class="num">${nf2.format(gt.amt)}</td></tr>`)};
   rows.forEach((r,i)=>{const c=srCalc(r);
-    if(so==='cat'&&catOf(r)!==g){flush();g=catOf(r);gt={ctn:0,loose:0,pcs:0,amt:0};out.push(`<tr class="grp"><td colspan="8">${esc(g)} <span style="opacity:.6;font-weight:600">· ${rows.filter(x=>catOf(x)===g).length}</span></td></tr>`)}
-    t.ctn+=c.ctn||0;t.loose+=c.loose||0;t.pcs+=c.pcs||0;t.amt+=c.amt||0;if(gt){gt.ctn+=c.ctn||0;gt.loose+=c.loose||0;gt.pcs+=c.pcs||0;gt.amt+=c.amt||0}
-    out.push(`<tr><td class="idx">${i+1}</td><td class="name">${esc(r.name)}</td><td class="num">${c.isCtn?'<span class="chip">carton</span>':c.P?c.P:'<span class="dash">—</span>'}</td>
+    if(so==='cat'&&catOf(r)!==g){flush();g=catOf(r);gt={ctn:0,loose:0,pcs:0,amt:0,raw:0};out.push(`<tr class="grp"><td colspan="9">${esc(g)} <span style="opacity:.6;font-weight:600">· ${rows.filter(x=>catOf(x)===g).length}</span></td></tr>`)}
+    t.ctn+=c.ctn||0;t.loose+=c.loose||0;t.pcs+=c.pcs||0;t.amt+=c.amt||0;t.raw+=+r.qty||0;if(gt){gt.ctn+=c.ctn||0;gt.loose+=c.loose||0;gt.pcs+=c.pcs||0;gt.amt+=c.amt||0;gt.raw+=+r.qty||0}
+    out.push(`<tr><td class="idx">${i+1}</td><td class="name">${esc(r.name)}</td><td class="num rawc">${esc(rawOf(r))}</td><td class="num">${c.isCtn?'<span class="chip">carton</span>':c.P?c.P:'<span class="dash">—</span>'}</td>
     <td class="num">${c.pcs!=null?nf0.format(c.pcs):'<span class="dash">—</span>'}</td><td class="num hot">${c.ctn!=null?nf0.format(c.ctn):'<span class="dash">—</span>'}</td>
     <td class="num">${c.loose!=null?nf0.format(c.loose):'<span class="dash">—</span>'}</td><td class="num">${c.rpc?nf2.format(c.rpc):'<span class="dash">—</span>'}</td><td class="num">${nf2.format(c.amt||0)}</td></tr>`)});flush();
-  body.innerHTML=out.join('')||'<tr class="empty-row"><td colspan="8">Nothing matches.</td></tr>';
-  $('#srFoot').innerHTML=rows.length?`<tr><td colspan="3" style="text-align:right;font-family:var(--f-body)">TOTAL · ${rows.length} products</td><td class="num">${nf0.format(t.pcs)}</td><td class="num hot">${nf0.format(t.ctn)}</td><td class="num">${nf0.format(t.loose)}</td><td></td><td class="num">${nf2.format(t.amt)}</td></tr>`:'';
+  body.innerHTML=out.join('')||'<tr class="empty-row"><td colspan="9">Nothing matches.</td></tr>';
+  $('#srFoot').innerHTML=rows.length?`<tr><td colspan="2" style="text-align:right;font-family:var(--f-body)">TOTAL · ${rows.length} products</td><td class="num">${fQ(t.raw)}</td><td></td><td class="num">${nf0.format(t.pcs)}</td><td class="num hot">${nf0.format(t.ctn)}</td><td class="num">${nf0.format(t.loose)}</td><td></td><td class="num">${nf2.format(t.amt)}</td></tr>`:'';
   const all=report.rows.map(r=>({r,c:srCalc(r)}));
   $('#sCtn').textContent=nf0.format(all.reduce((s,x)=>s+(x.c.ctn||0),0));$('#sLoose').textContent=nf0.format(all.reduce((s,x)=>s+(x.c.loose||0),0));
   $('#sAmt').textContent='Rs '+nf0.format(all.reduce((s,x)=>s+(x.c.amt||0),0));$('#sMiss').textContent=all.filter(x=>!x.c.isCtn&&!x.c.P&&x.r.qty!==0).length;
-  $('#srDate').textContent=fmtDate(report.date);$('#srDateIn').value=report.date||'';$('#srCount').textContent=`${rows.length} products · ${nf0.format(t.ctn)} ctn`;
+  $('#srDate').textContent=fmtDate(report.date);$('#srDateIn').value=report.date||'';$('#srCount').textContent=`${rows.length} products · ${nf0.format(t.ctn)} ctn`;renderVerify();
 }
 function stockRows(){
   if(!report)return{rows:[],so:'file',catOf:()=>''};
@@ -837,18 +858,18 @@ $('#srPdf').onclick=async()=>{
   const t={ctn:0,loose:0,pcs:0,amt:0};rows.forEach(r=>{const c=srCalc(r);t.ctn+=c.ctn||0;t.loose+=c.loose||0;t.pcs+=c.pcs||0;t.amt+=c.amt||0});
   const hd=await headerImage('sr','Stock Report · Carton-wise',`${rows.length} products · ${nf0.format(t.ctn)} ctn`);doc.addImage(hd.url,'PNG',M,8,W-2*M,hd.h);
   const body=[];let g=null,gt=null,n=0;
-  const sub=()=>{if(g!==null&&so==='cat')body.push([{content:`${g} total`,colSpan:3,styles:{halign:'right',fontStyle:'bold',fillColor:[247,243,242]}},...[gt.pcs,gt.ctn,gt.loose].map(v=>({content:nf0.format(v),styles:{fontStyle:'bold',fillColor:[247,243,242]}})),{content:'',styles:{fillColor:[247,243,242]}},{content:nf2.format(gt.amt),styles:{fontStyle:'bold',fillColor:[247,243,242]}}])};
+  const sub=()=>{if(g!==null&&so==='cat')body.push([{content:`${g} total`,colSpan:2,styles:{halign:'right',fontStyle:'bold',fillColor:[247,243,242]}},{content:fQ(gt.raw),styles:{fontStyle:'bold',fillColor:[247,243,242]}},{content:'',styles:{fillColor:[247,243,242]}},...[gt.pcs,gt.ctn,gt.loose].map(v=>({content:nf0.format(v),styles:{fontStyle:'bold',fillColor:[247,243,242]}})),{content:'',styles:{fillColor:[247,243,242]}},{content:nf2.format(gt.amt),styles:{fontStyle:'bold',fillColor:[247,243,242]}}])};
   rows.forEach(r=>{const c=srCalc(r);
-    if(so==='cat'&&catOf(r)!==g){sub();g=catOf(r);gt={ctn:0,loose:0,pcs:0,amt:0};body.push([{content:g.toUpperCase(),colSpan:8,styles:{fillColor:[247,243,242],textColor:[158,15,24],fontStyle:'bold',fontSize:8.5,halign:'left'}}])}
-    if(gt){gt.ctn+=c.ctn||0;gt.loose+=c.loose||0;gt.pcs+=c.pcs||0;gt.amt+=c.amt||0}
-    body.push([String(++n),r.name,c.isCtn?'carton':dash(c.P||null),c.pcs!=null?nf0.format(c.pcs):'—',c.ctn!=null?nf0.format(c.ctn):'—',c.loose!=null?nf0.format(c.loose):'—',c.rpc?nf2.format(c.rpc):'—',nf2.format(c.amt||0)])});
+    if(so==='cat'&&catOf(r)!==g){sub();g=catOf(r);gt={ctn:0,loose:0,pcs:0,amt:0,raw:0};body.push([{content:g.toUpperCase(),colSpan:9,styles:{fillColor:[247,243,242],textColor:[158,15,24],fontStyle:'bold',fontSize:8.5,halign:'left'}}])}
+    if(gt){gt.ctn+=c.ctn||0;gt.loose+=c.loose||0;gt.pcs+=c.pcs||0;gt.amt+=c.amt||0;gt.raw+=+r.qty||0}
+    body.push([String(++n),r.name,rawOf(r),c.isCtn?'carton':dash(c.P||null),c.pcs!=null?nf0.format(c.pcs):'—',c.ctn!=null?nf0.format(c.ctn):'—',c.loose!=null?nf0.format(c.loose):'—',c.rpc?nf2.format(c.rpc):'—',nf2.format(c.amt||0)])});
   sub();
-  doc.autoTable({startY:8+hd.h+3,head:[['#','Product','Packing','Stock pcs','Cartons','Loose','Rate / pc','Amount']],body,
-    foot:[[{content:`TOTAL · ${rows.length} products`,colSpan:3,styles:{halign:'right'}},nf0.format(t.pcs),nf0.format(t.ctn),nf0.format(t.loose),'',nf2.format(t.amt)]],
+  doc.autoTable({startY:8+hd.h+3,head:[['#','Product','In report','Packing','Stock pcs','Cartons','Loose','Rate / pc','Amount']],body,
+    foot:[[{content:`TOTAL · ${rows.length} products`,colSpan:2,styles:{halign:'right'}},fQ(rows.reduce((s,r)=>s+(+r.qty||0),0)),'',nf0.format(t.pcs),nf0.format(t.ctn),nf0.format(t.loose),'',nf2.format(t.amt)]],
     margin:{left:M,right:M,bottom:16,top:14},theme:'grid',showFoot:'lastPage',
-    styles:{font:'helvetica',fontSize:8.8,cellPadding:2,valign:'middle',lineColor:[225,217,215],lineWidth:.2,textColor:[20,18,22]},
+    styles:{font:'helvetica',fontSize:8.3,cellPadding:1.8,valign:'middle',lineColor:[225,217,215],lineWidth:.2,textColor:[20,18,22]},
     headStyles:{fillColor:[20,18,22],textColor:255,fontStyle:'bold',fontSize:8},footStyles:{fillColor:[20,18,22],textColor:255,fontStyle:'bold'},
-    columnStyles:{0:{cellWidth:8,halign:'center',textColor:[110,100,104]},1:{fontStyle:'bold'},2:{cellWidth:16,halign:'right'},3:{cellWidth:19,halign:'right'},4:{cellWidth:17,halign:'right',fontStyle:'bold',textColor:[158,15,24],fillColor:[253,240,240]},5:{cellWidth:14,halign:'right'},6:{cellWidth:19,halign:'right'},7:{cellWidth:26,halign:'right',fontStyle:'bold'}},
+    columnStyles:{0:{cellWidth:8,halign:'center',textColor:[110,100,104]},1:{fontStyle:'bold'},2:{cellWidth:19,halign:'right',fontStyle:'bold',textColor:[27,36,64],fillColor:[238,240,246]},3:{cellWidth:14,halign:'right'},4:{cellWidth:17,halign:'right'},5:{cellWidth:15,halign:'right',fontStyle:'bold',textColor:[158,15,24],fillColor:[253,240,240]},6:{cellWidth:12,halign:'right'},7:{cellWidth:17,halign:'right'},8:{cellWidth:24,halign:'right',fontStyle:'bold'}},
     didParseCell:d=>{if((d.section==='head'||d.section==='foot')&&d.column.index>=2)d.cell.styles.halign='right'},
     didDrawPage:d=>{const ph=doc.internal.pageSize.getHeight();doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(110,100,104);
       doc.text(`${co} · Stock Report${brand.pcName?' · '+brand.pcName:''} · ${fmtDate(report.date)}`,M,ph-8);doc.text(`Page ${d.pageNumber} of {total}`,W-M,ph-8,{align:'right'})}});
@@ -858,12 +879,12 @@ $('#srPdf').onclick=async()=>{
 $('#srXls').onclick=()=>{
   if(!report){toast('Upload a stock report first');return}
   const {rows,catOf}=stockRows();
-  const aoa=[[brand.company||'Your Company'],[`Stock Report · Carton-wise${brand.pcName?' · '+brand.pcName:''} · ${fmtDate(report.date)}`],[],['#','Product','Category','Packing (pcs/ctn)','Stock (pcs)','Cartons','Loose pcs','Rate / pc','Amount']];
+  const aoa=[[brand.company||'Your Company'],[`Stock Report · Carton-wise${brand.pcName?' · '+brand.pcName:''} · ${fmtDate(report.date)}`],[],['#','Product','Category','In report (as uploaded)','Packing (pcs/ctn)','Stock (pcs)','Cartons','Loose pcs','Rate / pc','Amount']];
   const t={ctn:0,loose:0,pcs:0,amt:0};
   rows.forEach((r,i)=>{const c=srCalc(r);t.ctn+=c.ctn||0;t.loose+=c.loose||0;t.pcs+=c.pcs||0;t.amt+=c.amt||0;
-    aoa.push([i+1,r.name,catOf(r),c.isCtn?'carton':(c.P||''),c.pcs??'',c.ctn??'',c.loose??'',c.rpc?+c.rpc.toFixed(2):'',+(c.amt||0).toFixed(2)])});
-  aoa.push(['','TOTAL','','',t.pcs,t.ctn,t.loose,'',+t.amt.toFixed(2)]);
-  const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=[{wch:4},{wch:40},{wch:16},{wch:10},{wch:11},{wch:9},{wch:9},{wch:10},{wch:14}];
+    aoa.push([i+1,r.name,catOf(r),rawOf(r),c.isCtn?'carton':(c.P||''),c.pcs??'',c.ctn??'',c.loose??'',c.rpc?+c.rpc.toFixed(2):'',+(c.amt||0).toFixed(2)])});
+  aoa.push(['','TOTAL','',fQ(rows.reduce((s,r)=>s+(+r.qty||0),0)),'',t.pcs,t.ctn,t.loose,'',+t.amt.toFixed(2)]);
+  const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=[{wch:4},{wch:40},{wch:16},{wch:14},{wch:10},{wch:11},{wch:9},{wch:9},{wch:10},{wch:14}];
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Stock Report');XLSX.writeFile(wb,`Stock-Report-${report.date}.xlsx`);
 };
 $('#pick').onclick=()=>$('#file').click();$('#file').onchange=e=>{handleFile(e.target.files[0]);e.target.value=''};
