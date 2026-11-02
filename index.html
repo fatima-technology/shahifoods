@@ -198,6 +198,21 @@ table.rep{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;
 .savebar .btn{border-color:rgba(255,255,255,.25);background:transparent;color:var(--head-fg)}
 .savebar .btn.red{background:var(--accent);border-color:var(--accent)}
 @media print{.pco b{color:#000}}
+.cloudpill{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:var(--head-fg);border-radius:99px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.cloudpill i{width:8px;height:8px;border-radius:50%;background:#8a8a8a;flex:none}
+.cloudpill[data-st="synced"] i{background:#4ade80}
+.cloudpill[data-st="syncing"] i{background:#fbbf24;animation:blink 1s infinite}
+.cloudpill[data-st="error"] i{background:#f87171}
+@keyframes blink{50%{opacity:.3}}
+.cloudcard{margin-top:16px}
+.cloudcard .grid2{margin-top:10px}
+.steps-ol{margin:0;padding-left:18px;font-size:13px;line-height:1.7;color:var(--muted)}
+.steps-ol b{color:var(--ink)}
+.codebox{font-family:var(--f-mono);font-size:11.5px;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px;white-space:pre;overflow-x:auto;margin:8px 0 0}
+.cstate{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--surface-2);border-radius:10px;padding:12px 14px;font-weight:700}
+.cstate .dot{width:10px;height:10px;border-radius:50%;background:var(--muted)}
+.cstate.ok .dot{background:var(--good)}.cstate.err .dot{background:var(--bad)}
+@media print{.cloudpill{display:none}}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--head-bg);color:var(--head-fg);padding:10px 18px;border-radius:9px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.2s;z-index:20;max-width:calc(100% - 32px)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -234,8 +249,9 @@ table.rep{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;
   <div class="wrap">
     <div class="brand">
       <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg></div>
-      <div><h1>CARTON RATE LIST<span class="ver">v3.1</span></h1><small>Carton rate · Piece rate · Packing</small></div>
+      <div><h1>CARTON RATE LIST<span class="ver">v3.2</span></h1><small>Carton rate · Piece rate · Packing</small></div>
     </div>
+    <button class="cloudpill" id="cloudPill" data-st="off" type="button" title="Cloud sync"><i></i><span id="cloudTxt">Cloud off</span></button>
     <nav class="tabs" role="tablist">
       <button class="tab" role="tab" id="tab-rl" aria-selected="true" data-tab="rl">Rate List</button>
       <button class="tab" role="tab" id="tab-sr" aria-selected="false" data-tab="sr">Stock Report</button>
@@ -376,10 +392,55 @@ table.rep{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;
     <h3>Heading font</h3><p class="hint">Used for the company names and the rate list title on screen, in print and in the PDF.</p>
     <div class="fonts" id="fontGrid"></div>
   </div>
+  <div class="card cloudcard" id="cloudCard">
+    <h3>Cloud sync (Firebase)</h3>
+    <p class="hint">Keeps your rate list, packing, photos, logos, settings and last stock report in your own Firebase project, so the same data opens on your phone and laptop. Data stays in this browser too, so it works offline.</p>
+    <div class="cstate" id="cState"><span class="dot"></span><span id="cStateTxt">Not connected</span></div>
+    <p class="hint" id="cFramed" hidden style="margin:10px 0 0">Cloud sync works in the GitHub Pages file, not inside this preview.</p>
+    <div class="grid2">
+      <div>
+        <label class="f" for="fbCfg">1 · Firebase config</label>
+        <textarea class="inp" id="fbCfg" rows="7" placeholder="Paste the firebaseConfig from Firebase console → Project settings → Your apps → Web app. Example:&#10;{&#10;  apiKey: &quot;AIza...&quot;,&#10;  authDomain: &quot;your-app.firebaseapp.com&quot;,&#10;  projectId: &quot;your-app&quot;,&#10;  appId: &quot;1:...:web:...&quot;&#10;}" style="font-family:var(--f-mono);font-size:12px"></textarea>
+        <div class="row" style="margin-top:8px"><button class="btn primary" id="fbCfgSave" type="button">Connect Firebase</button><button class="btn" id="fbCfgDel" type="button">Disconnect</button></div>
+      </div>
+      <div>
+        <label class="f" for="fbEmail">2 · Sign in</label>
+        <div id="fbLoggedOut">
+          <input class="inp" id="fbEmail" type="email" placeholder="Email" autocomplete="username">
+          <input class="inp" id="fbPass" type="password" placeholder="Password (6+ characters)" autocomplete="current-password" style="margin-top:8px">
+          <div class="row" style="margin-top:8px"><button class="btn red" id="fbIn" type="button">Sign in</button><button class="btn" id="fbUp" type="button">Create account</button><button class="btn sm" id="fbReset" type="button">Forgot password</button></div>
+        </div>
+        <div id="fbLoggedIn" hidden>
+          <p style="margin:0 0 10px;font-weight:700">Signed in as <span id="fbWho"></span></p>
+          <div class="row"><button class="btn" id="fbSyncNow" type="button">Sync now</button><button class="btn" id="fbOut" type="button">Sign out</button></div>
+        </div>
+      </div>
+    </div>
+    <details style="margin-top:14px"><summary style="cursor:pointer;font-weight:800">One-time Firebase setup</summary>
+      <ol class="steps-ol" style="margin-top:8px">
+        <li>Go to <b>console.firebase.google.com</b> → Add project.</li>
+        <li><b>Build → Authentication</b> → Get started → enable <b>Email/Password</b>.</li>
+        <li>Authentication → Settings → <b>Authorized domains</b> → add <b>fatima-technology.github.io</b>.</li>
+        <li><b>Build → Firestore Database</b> → Create database → then open the <b>Rules</b> tab and paste these rules → Publish:</li>
+      </ol>
+      <div class="codebox">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid}/{document=**} {
+      allow read, write: if request.auth != null &amp;&amp; request.auth.uid == uid;
+    }
+  }
+}</div>
+      <ol class="steps-ol" start="5" style="margin-top:8px">
+        <li><b>Project settings</b> (gear icon) → Your apps → <b>Web (&lt;/&gt;)</b> → register app → copy the <b>firebaseConfig</b> part and paste it in box 1.</li>
+        <li>Create an account in box 2. Use the same email and password on your other phone or laptop.</li>
+      </ol>
+    </details>
+  </div>
   <div class="savebar" id="saveBar"><span class="st" id="saveSt">All settings saved</span><button class="btn" id="bDiscard">Undo changes</button><button class="btn red" id="bSave">Save settings</button></div>
 </section>
 
-<footer class="appfoot no-print"><span><b>FATIMA-TECH</b> · Carton Rate List v3.1</span><span>Saved in this browser · make a backup from Settings</span></footer>
+<footer class="appfoot no-print"><span><b>FATIMA-TECH</b> · Carton Rate List v3.2</span><span>Saved in this browser · make a backup from Settings</span></footer>
 </main>
 <div class="toast" id="toast" role="status"></div>
 
@@ -397,6 +458,7 @@ let photos=LS.get('cs_photos',{});     // KEY -> small jpeg dataURL
 const defBrand=()=>({company:'',sub:'',listTitle:'Rate List',foot:'',logo:'',pcName:'',pcLogo:'',headFont:'archivo'});
 let brand=Object.assign(defBrand(),LS.get('cs_brand',{}));
 let report=LS.get('cs_report',null);if(report&&report.demo)report=null;
+var cloud=null;function cq(w){if(cloud)cloud.queue(w)}
 
 /* ---------- helpers ---------- */
 const keyOf=n=>String(n||'').trim().toUpperCase().replace(/\s+/g,' ');
@@ -410,8 +472,8 @@ let rlDate=LS.get('cs_rldate','');
 const listDate=()=>rlDate||today();
 function fmtDate(iso){if(!iso)return'—';const d=new Date(iso+'T00:00:00');return isNaN(d)?iso:d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2600)}
-const saveMaster=()=>{if(!LS.set('cs_master',master))toast('Browser storage is blocked — changes were not saved')};
-const savePhotos=()=>{if(!LS.set('cs_photos',photos)){toast('Browser storage is full — photo not saved. Remove some photos or make a backup.');return false}return true};
+const saveMaster=()=>{if(!LS.set('cs_master',master))toast('Browser storage is blocked — changes were not saved');cq('master')};
+const savePhotos=()=>{cq('photos');if(!LS.set('cs_photos',photos)){toast('Browser storage is full — photo not saved. Remove some photos or make a backup.');return false}return true};
 const okP=m=>m.packing&&!m.guess?+m.packing:null;
 const ctnOf=m=>m.ctnRate||(m.rate&&okP(m)?m.rate*okP(m):null);
 const pcOf=m=>m.rate||(m.ctnRate&&okP(m)?m.ctnRate/okP(m):null);
@@ -591,8 +653,8 @@ $('#eName').addEventListener('keydown',e=>{
   else if(e.key==='Escape')acClose();
 });
 acBox.addEventListener('mousedown',e=>{const li=e.target.closest('li');if(li){e.preventDefault();acPick(+li.dataset.i)}});
-$('#rlDateIn').addEventListener('change',e=>{rlDate=e.target.value;LS.set('cs_rldate',rlDate);renderList();toast('Rate list date: '+fmtDate(listDate()))});
-$('#rlToday').onclick=()=>{rlDate='';LS.set('cs_rldate','');renderList();toast('Date set to today')};
+$('#rlDateIn').addEventListener('change',e=>{rlDate=e.target.value;LS.set('cs_rldate',rlDate);cq('meta');renderList();toast('Rate list date: '+fmtDate(listDate()))});
+$('#rlToday').onclick=()=>{rlDate='';LS.set('cs_rldate','');cq('meta');renderList();toast('Date set to today')};
 ['q','cat','sort','onlyOk'].forEach(id=>{$('#'+id).addEventListener('input',renderList);$('#'+id).addEventListener('change',renderList)});
 
 /* ---------- PDF (A4, with photos) ---------- */
@@ -665,7 +727,7 @@ function absorb(rep){rep.rows.forEach(r=>{const k=keyOf(r.name);const m=master[k
 function handleFile(f){
   if(!f)return;if(typeof XLSX==='undefined'){toast('The Excel reader did not load — check the internet');return}
   const rd=new FileReader();rd.onload=e=>{try{const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
-    report=parseWorkbook(wb,f.name);absorb(report);LS.set('cs_report',report);renderAll();toast(`${report.rows.length} products loaded — piece rates added to the rate list`)}catch(err){toast(err.message||'Could not read this file')}};
+    report=parseWorkbook(wb,f.name);absorb(report);LS.set('cs_report',report);cq('report');renderAll();toast(`${report.rows.length} products loaded — piece rates added to the rate list`)}catch(err){toast(err.message||'Could not read this file')}};
   rd.readAsArrayBuffer(f);
 }
 function srCalc(r){const m=master[keyOf(r.name)]||{};const P=okP(m)||0;
@@ -691,7 +753,7 @@ function renderStock(){
 $('#pick').onclick=()=>$('#file').click();$('#file').onchange=e=>{handleFile(e.target.files[0]);e.target.value=''};
 const drop=$('#drop');['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag')}));
 ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag')}));drop.addEventListener('drop',e=>handleFile(e.dataTransfer.files[0]));
-$('#srDateIn').addEventListener('change',e=>{if(!report){e.target.value='';toast('Upload a stock report first');return}report.date=e.target.value||today();LS.set('cs_report',report);renderStock();toast('Report date changed to '+fmtDate(report.date))});
+$('#srDateIn').addEventListener('change',e=>{if(!report){e.target.value='';toast('Upload a stock report first');return}report.date=e.target.value||today();LS.set('cs_report',report);cq('report');renderStock();toast('Report date changed to '+fmtDate(report.date))});
 ['sq','sHideZero'].forEach(id=>{$('#'+id).addEventListener('input',renderStock);$('#'+id).addEventListener('change',renderStock)});
 
 /* ================= SETTINGS ================= */
@@ -705,7 +767,7 @@ function renderBrand(){
   $('#bLogoPrev').innerHTML=brand.logo?`<img src="${brand.logo}" alt="Logo">`:'<span style="color:var(--muted);font-size:12px">No logo</span>';
 }
 let dirty=false;
-const saveBrand=()=>LS.set('cs_brand',brand);
+const saveBrand=()=>{cq('brand');return LS.set('cs_brand',brand)};
 function markDirty(){dirty=true;const st=$('#saveSt');st.textContent='Unsaved changes — press Save settings';st.classList.add('dirty')}
 $('#bSave').onclick=()=>{if(saveBrand()){dirty=false;const st=$('#saveSt');st.textContent='Saved at '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});st.classList.remove('dirty');toast('Settings saved')}else toast('Could not save — browser storage is full or blocked')};
 $('#bDiscard').onclick=()=>{brand=Object.assign(defBrand(),LS.get('cs_brand',{}));dirty=false;fillBrand();applyFont();renderBrand();renderList();renderFonts();const st=$('#saveSt');st.textContent='Changes undone';st.classList.remove('dirty')};
@@ -753,6 +815,101 @@ $('#dlBk').onclick=()=>{const a=document.createElement('a');a.href=URL.createObj
 $('#copyBk').onclick=()=>{const t=backupText();navigator.clipboard.writeText(t).then(()=>toast('Backup copied')).catch(()=>{const ta=$('#pasteBk');ta.value=t;ta.select();toast('Backup selected — press Ctrl+C to copy')})};
 $('#impBk').onclick=()=>$('#impFile').click();$('#impFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>restore(r.result);r.readAsText(f);e.target.value=''};
 $('#pasteApply').onclick=()=>{const t=$('#pasteBk').value.trim();if(t)restore(t)};
+
+/* ================= CLOUD SYNC (Firebase) ================= */
+const FB_BUILTIN={ /* Shahi Carton Rate List — Firebase project */
+  apiKey:"AIzaSyA8h3epVguJUOc9KUfFGIayUbWHiMOU1Dk",
+  authDomain:"shahi-carton-rate-list.firebaseapp.com",
+  projectId:"shahi-carton-rate-list",
+  storageBucket:"shahi-carton-rate-list.firebasestorage.app",
+  messagingSenderId:"226746663653",
+  appId:"1:226746663653:web:764650062c4036f77d8a0c"};
+const FBV='10.12.2',FBJS=['app','auth','firestore'].map(n=>`https://cdn.jsdelivr.net/npm/firebase@${FBV}/firebase-${n}-compat.js`);
+function parseCfg(t){t=String(t||'');const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a<0||b<a)throw new Error('No { … } found');
+  let o=t.slice(a,b+1).replace(/\/\/.*$/gm,'').replace(/([{,]\s*)([A-Za-z_$][\w$]*)\s*:/g,'$1"$2":').replace(/'([^']*)'/g,'"$1"').replace(/,\s*}/g,'}');
+  const c=JSON.parse(o);if(!c.apiKey||!c.projectId)throw new Error('apiKey or projectId missing');return c}
+function loadScript(u){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=u;s.onload=res;s.onerror=()=>rej(new Error('Could not load '+u));document.head.appendChild(s)})}
+function pid(k){let h=2166136261;for(let i=0;i<k.length;i++){h^=k.charCodeAt(i);h=Math.imul(h,16777619)}return 'p'+(h>>>0).toString(36)+'_'+k.length}
+function setPill(st,txt){const p=$('#cloudPill');p.dataset.st=st;$('#cloudTxt').textContent=txt;
+  const cs=$('#cState');cs.className='cstate'+(st==='synced'?' ok':st==='error'?' err':'');$('#cStateTxt').textContent=txt}
+$('#cloudPill').onclick=()=>{$('#tab-st').click();setTimeout(()=>$('#cloudCard').scrollIntoView({behavior:'smooth',block:'start'}),50)};
+const Cloud={
+  cfg:null,db:null,auth:null,user:null,timers:{},seen:{},photoSeen:{},unsub:[],ready:false,
+  docs:{master:()=>JSON.stringify(master),brand:()=>JSON.stringify(brand),report:()=>JSON.stringify(report||null),meta:()=>JSON.stringify({rlDate})},
+  ref(name){return this.db.collection('users').doc(this.user.uid).collection('app').doc(name)},
+  pref(k){return this.db.collection('users').doc(this.user.uid).collection('photos').doc(pid(k))},
+  queue(w){if(!this.user||!this.ready)return;clearTimeout(this.timers[w]);setPill('syncing','Syncing…');this.timers[w]=setTimeout(()=>this.push(w),700)},
+  async push(w){try{
+    if(w==='photos'){const b=this.db.batch();let n=0;
+      for(const k of Object.keys(photos))if(this.photoSeen[k]!==photos[k]){b.set(this.pref(k),{key:k,img:photos[k],at:Date.now()});this.photoSeen[k]=photos[k];n++}
+      for(const k of Object.keys(this.photoSeen))if(!(k in photos)){b.delete(this.pref(k));delete this.photoSeen[k];n++}
+      if(n)await b.commit();
+    }else{const j=this.docs[w]();if(this.seen[w]!==j){this.seen[w]=j;await this.ref(w).set({json:j,at:Date.now()})}}
+    this.ok()}catch(e){this.fail(e)}},
+  ok(){setPill('synced','Synced '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}))},
+  fail(e){console.warn(e);setPill('error',/permission/i.test(e.message||'')?'Cloud: permission denied — check Firestore rules':'Cloud error: '+(e.message||e))},
+  apply(name,j){
+    let v;try{v=JSON.parse(j)}catch(e){return}
+    if(name==='master'){master=v||{};LS.set('cs_master',master)}
+    else if(name==='brand'){if(dirty)return;brand=Object.assign(defBrand(),v||{});LS.set('cs_brand',brand);fillBrand();applyFont()}
+    else if(name==='report'){report=v;LS.set('cs_report',report)}
+    else if(name==='meta'){rlDate=(v&&v.rlDate)||'';LS.set('cs_rldate',rlDate)}
+    this.seen[name]=j;
+  },
+  async firstSync(){
+    setPill('syncing','Syncing…');
+    const [app,ph]=await Promise.all([this.db.collection('users').doc(this.user.uid).collection('app').get(),this.db.collection('users').doc(this.user.uid).collection('photos').get()]);
+    const localMaster=master,localPhotos=photos;
+    if(app.empty&&ph.empty){this.ready=true;['master','brand','report','meta','photos'].forEach(w=>this.push(w));toast('Cloud is empty — this device’s data uploaded');}
+    else{
+      app.forEach(d=>this.apply(d.id,d.data().json));
+      let added=0;for(const k in localMaster)if(!master[k]){master[k]=localMaster[k];added++}
+      const cp={};ph.forEach(d=>{const x=d.data();cp[x.key]=x.img;this.photoSeen[x.key]=x.img});
+      let padd=0;for(const k in localPhotos)if(!cp[k]){cp[k]=localPhotos[k];padd++}
+      photos=cp;LS.set('cs_master',master);LS.set('cs_photos',photos);
+      this.ready=true;if(added)this.push('master');if(padd)this.push('photos');
+      renderAll();toast('Cloud data loaded'+(added||padd?` · ${added+padd} items from this device added`:''));
+    }
+    this.listen();this.ok();
+  },
+  listen(){
+    this.unsub.forEach(u=>u());this.unsub=[];
+    const base=this.db.collection('users').doc(this.user.uid);
+    this.unsub.push(base.collection('app').onSnapshot(snap=>{let ch=false;
+      snap.docChanges().forEach(c=>{if(c.doc.metadata.hasPendingWrites||c.type==='removed')return;const j=c.doc.data().json;if(this.seen[c.doc.id]!==j){this.apply(c.doc.id,j);ch=true}});
+      if(ch){renderAll();this.ok();toast('Updated from another device')}},e=>this.fail(e)));
+    this.unsub.push(base.collection('photos').onSnapshot(snap=>{let ch=false;
+      snap.docChanges().forEach(c=>{if(c.doc.metadata.hasPendingWrites)return;const x=c.doc.data();
+        if(c.type==='removed'){if(x.key in photos){delete photos[x.key];delete this.photoSeen[x.key];ch=true}}
+        else if(photos[x.key]!==x.img){photos[x.key]=x.img;this.photoSeen[x.key]=x.img;ch=true}});
+      if(ch){LS.set('cs_photos',photos);renderList()}},e=>this.fail(e)));
+  },
+  async start(cfg){
+    this.cfg=cfg;setPill('syncing','Connecting…');
+    try{if(!window.firebase){for(const u of FBJS)await loadScript(u)}
+      if(!firebase.apps.length)firebase.initializeApp(cfg);
+      this.auth=firebase.auth();this.db=firebase.firestore();
+      this.auth.onAuthStateChanged(u=>{this.user=u;this.ready=false;this.unsub.forEach(x=>x());this.unsub=[];this.seen={};this.photoSeen={};
+        $('#fbLoggedOut').hidden=!!u;$('#fbLoggedIn').hidden=!u;$('#fbWho').textContent=u?u.email:'';
+        if(u)this.firstSync().catch(e=>this.fail(e));else setPill('off','Cloud: signed out')});
+    }catch(e){this.fail(e)}
+  }
+};
+function authErr(e){const m={'auth/invalid-credential':'Wrong email or password','auth/wrong-password':'Wrong password','auth/user-not-found':'No account with this email — press Create account','auth/email-already-in-use':'This email already has an account — press Sign in','auth/weak-password':'Password must be at least 6 characters','auth/invalid-email':'That email address is not valid','auth/unauthorized-domain':'This website is not in Firebase “Authorized domains”','auth/operation-not-allowed':'Turn on Email/Password in Firebase Authentication','auth/network-request-failed':'No internet connection'};toast(m[e.code]||e.message||'Sign-in failed')}
+const creds=()=>[$('#fbEmail').value.trim(),$('#fbPass').value];
+$('#fbIn').onclick=()=>{if(!Cloud.auth){toast('Connect Firebase first (step 1)');return}const [a,b]=creds();Cloud.auth.signInWithEmailAndPassword(a,b).then(()=>toast('Signed in')).catch(authErr)};
+$('#fbUp').onclick=()=>{if(!Cloud.auth){toast('Connect Firebase first (step 1)');return}const [a,b]=creds();Cloud.auth.createUserWithEmailAndPassword(a,b).then(()=>toast('Account created and signed in')).catch(authErr)};
+$('#fbReset').onclick=()=>{if(!Cloud.auth){toast('Connect Firebase first (step 1)');return}const a=creds()[0];if(!a){toast('Type your email first');return}Cloud.auth.sendPasswordResetEmail(a).then(()=>toast('Password reset email sent')).catch(authErr)};
+$('#fbOut').onclick=()=>{Cloud.auth&&Cloud.auth.signOut().then(()=>toast('Signed out — data stays on this device'))};
+$('#fbSyncNow').onclick=()=>{['master','brand','report','meta','photos'].forEach(w=>{Cloud.seen[w]=null;Cloud.push(w)});toast('Syncing everything')};
+$('#fbCfgSave').onclick=()=>{let c;try{c=parseCfg($('#fbCfg').value)}catch(e){toast('Config not recognised — paste the whole firebaseConfig { … } part');return}
+  LS.set('cs_fbcfg',c);if(window.firebase&&firebase.apps.length){toast('Config saved — reload the page to use the new project');return}cloud=Cloud;Cloud.start(c);toast('Firebase connected — now sign in')};
+$('#fbCfgDel').onclick=()=>{try{localStorage.removeItem('cs_fbcfg')}catch(e){}if(Cloud.auth)Cloud.auth.signOut();toast('Firebase disconnected on this device — reload the page');setPill('off','Cloud off')};
+(function(){
+  if(framed){$('#cFramed').hidden=false;setPill('off','Cloud: GitHub file only');document.querySelectorAll('#cloudCard button').forEach(b=>b.disabled=true);return}
+  const c=FB_BUILTIN||LS.get('cs_fbcfg',null);
+  if(c){$('#fbCfg').value=JSON.stringify(c,null,2);cloud=Cloud;Cloud.start(c)}else setPill('off','Cloud off');
+})();
 
 /* ---------- tabs + boot ---------- */
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
