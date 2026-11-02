@@ -5,6 +5,10 @@
 <title>Carton Rate List</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%278%27%20fill%3D%27%23d0202b%27/%3E%3Cg%20transform%3D%27translate%284%204%29%27%20fill%3D%27none%27%20stroke%3D%27%23fff%27%20stroke-width%3D%272.2%27%20stroke-linejoin%3D%27round%27%20stroke-linecap%3D%27round%27%3E%3Cpath%20d%3D%27M3%207.5%2012%203l9%204.5v9L12%2021l-9-4.5z%27/%3E%3Cpath%20d%3D%27M3%207.5%2012%2012l9-4.5M12%2012v9%27/%3E%3Cpath%20d%3D%27m7.5%205.2%209%204.6%27%20stroke-opacity%3D%27.65%27%20stroke-width%3D%271.6%27/%3E%3C/g%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="icon" type="image/png" sizes="180x180" href="data:image/png;base64,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">
+<meta name="theme-color" content="#141216">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700;800&display=swap">
@@ -53,7 +57,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .brand small{display:block;font-size:11px;opacity:.7;letter-spacing:.08em;text-transform:uppercase;margin-top:4px;font-weight:600}
 .ver{display:inline-block;font-family:var(--f-mono);font-size:10px;font-weight:700;background:rgba(255,255,255,.14);padding:2px 7px;border-radius:99px;margin-left:8px;vertical-align:3px}
 .tabs{display:flex;gap:4px;background:rgba(255,255,255,.08);padding:4px;border-radius:9px}
-.tab{background:none;border:0;padding:7px 14px;border-radius:6px;cursor:pointer;color:var(--head-fg);opacity:.75;font-weight:700}
+.tab{display:inline-flex;align-items:center;gap:7px;background:none;border:0;padding:7px 14px;border-radius:6px;cursor:pointer;color:var(--head-fg);opacity:.75;font-weight:700}
 .tab[aria-selected="true"]{background:var(--accent);color:var(--on-accent);opacity:1}
 main{padding-block:20px 0}
 
@@ -213,6 +217,14 @@ table.rep{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;
 .cstate .dot{width:10px;height:10px;border-radius:50%;background:var(--muted)}
 .cstate.ok .dot{background:var(--good)}.cstate.err .dot{background:var(--bad)}
 @media print{.cloudpill{display:none}}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;padding:6px 12px;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--head-bg);color:var(--head-fg)}
+table.ph-off .ph{opacity:.35}
+.rep tr.sub td{font-weight:800;border-bottom:2px solid var(--line);background:var(--surface-2)}
+@media print{table.ph-off .ph{display:none}}
+.tab svg{width:16px;height:16px;flex:none}
+@media (max-width:480px){.tab{padding:7px 10px;gap:5px}.tab svg{width:15px;height:15px}}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--head-bg);color:var(--head-fg);padding:10px 18px;border-radius:9px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.2s;z-index:20;max-width:calc(100% - 32px)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -249,13 +261,13 @@ table.rep{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;
   <div class="wrap">
     <div class="brand">
       <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg></div>
-      <div><h1>CARTON RATE LIST<span class="ver">v3.2</span></h1><small>Carton rate · Piece rate · Packing</small></div>
+      <div><h1>CARTON RATE LIST<span class="ver">v3.3</span></h1><small>Carton rate · Piece rate · Packing</small></div>
     </div>
     <button class="cloudpill" id="cloudPill" data-st="off" type="button" title="Cloud sync"><i></i><span id="cloudTxt">Cloud off</span></button>
     <nav class="tabs" role="tablist">
-      <button class="tab" role="tab" id="tab-rl" aria-selected="true" data-tab="rl">Rate List</button>
-      <button class="tab" role="tab" id="tab-sr" aria-selected="false" data-tab="sr">Stock Report</button>
-      <button class="tab" role="tab" id="tab-st" aria-selected="false" data-tab="st">Settings</button>
+      <button class="tab" role="tab" id="tab-rl" aria-selected="true" data-tab="rl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="8" cy="8" r="1.6"/></svg><span>Rate List</span></button>
+      <button class="tab" role="tab" id="tab-sr" aria-selected="false" data-tab="sr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg><span>Stock Report</span></button>
+      <button class="tab" role="tab" id="tab-st" aria-selected="false" data-tab="st"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Settings</span></button>
     </nav>
   </div>
 </header>
@@ -287,7 +299,8 @@ table.rep{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;
   <div class="toolbar">
     <div class="field search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" placeholder="Search products" aria-label="Search"></div>
     <div class="field"><select id="cat" aria-label="Category"><option value="">All categories</option></select></div>
-    <div class="field"><select id="sort" aria-label="Sort"><option value="cat">By category</option><option value="name">Name A–Z</option><option value="new">Recently updated</option></select></div>
+    <div class="seg" id="segRl" role="group" aria-label="Order"><button type="button" data-v="cat">Category-wise</button><button type="button" data-v="name">A–Z</button><button type="button" data-v="new">Recently updated</button></div><input type="hidden" id="sort" value="cat">
+    <label class="chk" title="Show product photos on print and PDF"><input type="checkbox" id="showPh" checked> Photos on print &amp; PDF</label>
     <label class="chk"><input type="checkbox" id="onlyOk"> Only ready products</label>
     <div class="field" title="Date printed on the rate list and PDF"><span style="font-size:12px;font-weight:800;opacity:.75">Date</span><input id="rlDateIn" type="date" aria-label="Rate list date"></div><button class="btn sm" id="rlToday" type="button">Today</button>
   </div>
@@ -304,12 +317,12 @@ table.rep{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;
     <div class="sheet-head">
       <div class="logo-box brand-logo"></div>
       <div class="co"><h2 class="brand-co">Your Company</h2><p class="brand-sub"></p></div>
-      <div class="meta"><div id="pcoBox"></div><span>Updated</span><b id="rlDate">—</b></div>
+      <div class="meta"><div id="pcoBox" class="pco-slot" data-label="Rate list of"></div><span>Updated</span><b id="rlDate">—</b></div>
     </div>
     <div class="tape"><span id="rlTitle">Rate List</span><small id="rlCount"></small></div>
     <div class="tbl-wrap">
-      <table class="rep">
-        <thead><tr><th>#</th><th>Photo</th><th>Product</th><th class="num">Packing<small>pcs / carton</small></th><th class="num">Rate<small>per carton</small></th><th class="num">Rate<small>per piece</small></th><th class="del"></th></tr></thead>
+      <table class="rep" id="rlTable">
+        <thead><tr><th>#</th><th class="ph">Photo</th><th>Product</th><th class="num">Packing<small>pcs / carton</small></th><th class="num">Rate<small>per carton</small></th><th class="num">Rate<small>per piece</small></th><th class="del"></th></tr></thead>
         <tbody id="rlBody"></tbody>
       </table>
     </div>
@@ -333,6 +346,7 @@ table.rep{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;
   </div>
   <div class="toolbar">
     <div class="field search"><input id="sq" placeholder="Search products" aria-label="Search stock"></div>
+    <div class="seg" id="segSr" role="group" aria-label="Order"><button type="button" data-v="file">Report order</button><button type="button" data-v="cat">Category-wise</button><button type="button" data-v="name">A–Z</button></div><input type="hidden" id="ssort" value="cat">
     <label class="chk"><input type="checkbox" id="sHideZero" checked> Hide zero stock</label>
     <div class="field" title="Date printed on the stock report"><span style="font-size:12px;font-weight:800;opacity:.75">Date</span><input id="srDateIn" type="date" aria-label="Stock report date"></div>
     <span class="spacer"></span>
@@ -343,7 +357,7 @@ table.rep{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;
     <div class="sheet-head">
       <div class="logo-box brand-logo"></div>
       <div class="co"><h2 class="brand-co">Your Company</h2><p class="brand-sub"></p></div>
-      <div class="meta"><span>Report date</span><b id="srDate">—</b></div>
+      <div class="meta"><div class="pco-slot" data-label="Stock of"></div><span>Report date</span><b id="srDate">—</b></div>
     </div>
     <div class="tape"><span>Stock Report · Carton-wise</span><small id="srCount"></small></div>
     <div class="tbl-wrap">
@@ -440,7 +454,7 @@ service cloud.firestore {
   <div class="savebar" id="saveBar"><span class="st" id="saveSt">All settings saved</span><button class="btn" id="bDiscard">Undo changes</button><button class="btn red" id="bSave">Save settings</button></div>
 </section>
 
-<footer class="appfoot no-print"><span><b>FATIMA-TECH</b> · Carton Rate List v3.2</span><span>Saved in this browser · make a backup from Settings</span></footer>
+<footer class="appfoot no-print"><span><b>FATIMA-TECH</b> · Carton Rate List v3.3</span><span>Saved in this browser · make a backup from Settings</span></footer>
 </main>
 <div class="toast" id="toast" role="status"></div>
 
@@ -534,6 +548,7 @@ function renderList(){
       <td class="num"><input class="pk rt rl" data-k="${esc(k)}" data-f="pc" type="number" min="0" step="any" inputmode="decimal" value="${pc?r2(pc):''}" placeholder="—" aria-label="Piece rate ${esc(m.name)}"></td>
       <td class="del"><button class="x" data-del="${esc(k)}" title="Delete product" aria-label="Delete ${esc(m.name)}">×</button></td></tr>`;
   });
+  $('#rlTable').classList.toggle('ph-off',!$('#showPh').checked);
   $('#rlBody').innerHTML=html||'<tr class="empty-row"><td colspan="7"><b>No products here</b>Add one above, or clear the search.</td></tr>';
   flashKey=null;
   const all=Object.values(master);
@@ -655,7 +670,15 @@ $('#eName').addEventListener('keydown',e=>{
 acBox.addEventListener('mousedown',e=>{const li=e.target.closest('li');if(li){e.preventDefault();acPick(+li.dataset.i)}});
 $('#rlDateIn').addEventListener('change',e=>{rlDate=e.target.value;LS.set('cs_rldate',rlDate);cq('meta');renderList();toast('Rate list date: '+fmtDate(listDate()))});
 $('#rlToday').onclick=()=>{rlDate='';LS.set('cs_rldate','');cq('meta');renderList();toast('Date set to today')};
-['q','cat','sort','onlyOk'].forEach(id=>{$('#'+id).addEventListener('input',renderList);$('#'+id).addEventListener('change',renderList)});
+const view=Object.assign({sort:'cat',ssort:'cat',showPh:true},LS.get('cs_view',{}));
+$('#sort').value=view.sort;$('#ssort').value=view.ssort;$('#showPh').checked=view.showPh!==false;
+function segSync(){[['segRl','sort'],['segSr','ssort']].forEach(([g,i])=>document.querySelectorAll('#'+g+' button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===$('#'+i).value)))}
+const saveView=()=>{view.sort=$('#sort').value;view.ssort=$('#ssort').value;view.showPh=$('#showPh').checked;LS.set('cs_view',view)};
+$('#segRl').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('#sort').value=b.dataset.v;segSync();saveView();renderList()});
+$('#segSr').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('#ssort').value=b.dataset.v;segSync();saveView();renderStock()});
+$('#showPh').addEventListener('change',()=>{saveView();toast($('#showPh').checked?'Photos will print and go in the PDF':'Photos hidden from print and PDF')});
+segSync();
+['q','cat','sort','onlyOk','showPh'].forEach(id=>{$('#'+id).addEventListener('input',renderList);$('#'+id).addEventListener('change',renderList)});
 
 /* ---------- PDF (A4, with photos) ---------- */
 $('#rlPdf').onclick=()=>{
@@ -675,7 +698,7 @@ $('#rlPdf').onclick=()=>{
   doc.setFillColor(208,32,43);doc.rect(M,35,W-2*M,9,'F');doc.setFillColor(20,18,22);doc.rect(M,44,W-2*M,1.2,'F');
   doc.setTextColor(255,255,255);doc.setFont(HF,'bold');doc.setFontSize(11.5);doc.text(((brand.pcName?brand.pcName+' · ':'')+title).toUpperCase(),M+4,41.2);doc.setFont('helvetica','bold');
   doc.setFontSize(8.5);doc.text(`Updated ${fmtDate(listDate())} · ${rows.length} products`,W-M-4,41,{align:'right'});
-  const usePh=rows.some(r=>photos[r.k]);const body=[],imgs=[];let n=0,lastCat;
+  const usePh=$('#showPh').checked&&rows.some(r=>photos[r.k]);const body=[],imgs=[];let n=0,lastCat;
   rows.forEach(({k,m})=>{
     if(so==='cat'&&m.cat!==lastCat){lastCat=m.cat;body.push([{content:(m.cat||'Other').toUpperCase(),colSpan:usePh?6:5,styles:{fillColor:[247,243,242],textColor:[158,15,24],fontStyle:'bold',fontSize:8.5}}]);imgs.push(null)}
     n++;const P=okP(m),c=ctnOf(m),p=pcOf(m);
@@ -738,12 +761,19 @@ function renderStock(){
   const body=$('#srBody');
   if(!report){body.innerHTML='<tr class="empty-row"><td colspan="8"><b>No stock report yet</b>Upload one above — pieces will be turned into cartons with your saved packing.</td></tr>';$('#srFoot').innerHTML='';['sCtn','sLoose','sAmt','sMiss'].forEach(id=>$('#'+id).textContent='0');$('#srDate').textContent='—';$('#srDateIn').value='';$('#srCount').textContent='';return}
   const q=$('#sq').value.trim().toUpperCase(),hz=$('#sHideZero').checked;
+  const so=$('#ssort').value,catOf=r=>r.cat||(master[keyOf(r.name)]||{}).cat||'Other';
   const rows=report.rows.filter(r=>(!q||r.name.toUpperCase().includes(q))&&(!hz||r.qty!==0));
-  const t={ctn:0,loose:0,pcs:0,amt:0};
-  body.innerHTML=rows.map((r,i)=>{const c=srCalc(r);t.ctn+=c.ctn||0;t.loose+=c.loose||0;t.pcs+=c.pcs||0;t.amt+=c.amt||0;
-    return`<tr><td class="idx">${i+1}</td><td class="name">${esc(r.name)}</td><td class="num">${c.isCtn?'<span class="chip">carton</span>':c.P?c.P:'<span class="dash">—</span>'}</td>
+  if(so==='name')rows.sort((a,b)=>a.name.localeCompare(b.name));
+  if(so==='cat')rows.sort((a,b)=>catOf(a).localeCompare(catOf(b))||a.name.localeCompare(b.name));
+  const t={ctn:0,loose:0,pcs:0,amt:0};let g=null,gt=null;const out=[];
+  const flush=()=>{if(g!==null&&so==='cat')out.push(`<tr class="sub"><td colspan="3" style="text-align:right">${esc(g)} total</td><td class="num">${nf0.format(gt.pcs)}</td><td class="num hot">${nf0.format(gt.ctn)}</td><td class="num">${nf0.format(gt.loose)}</td><td></td><td class="num">${nf2.format(gt.amt)}</td></tr>`)};
+  rows.forEach((r,i)=>{const c=srCalc(r);
+    if(so==='cat'&&catOf(r)!==g){flush();g=catOf(r);gt={ctn:0,loose:0,pcs:0,amt:0};out.push(`<tr class="grp"><td colspan="8">${esc(g)} <span style="opacity:.6;font-weight:600">· ${rows.filter(x=>catOf(x)===g).length}</span></td></tr>`)}
+    t.ctn+=c.ctn||0;t.loose+=c.loose||0;t.pcs+=c.pcs||0;t.amt+=c.amt||0;if(gt){gt.ctn+=c.ctn||0;gt.loose+=c.loose||0;gt.pcs+=c.pcs||0;gt.amt+=c.amt||0}
+    out.push(`<tr><td class="idx">${i+1}</td><td class="name">${esc(r.name)}</td><td class="num">${c.isCtn?'<span class="chip">carton</span>':c.P?c.P:'<span class="dash">—</span>'}</td>
     <td class="num">${c.pcs!=null?nf0.format(c.pcs):'<span class="dash">—</span>'}</td><td class="num hot">${c.ctn!=null?nf0.format(c.ctn):'<span class="dash">—</span>'}</td>
-    <td class="num">${c.loose!=null?nf0.format(c.loose):'<span class="dash">—</span>'}</td><td class="num">${c.rpc?nf2.format(c.rpc):'<span class="dash">—</span>'}</td><td class="num">${nf2.format(c.amt||0)}</td></tr>`}).join('')||'<tr class="empty-row"><td colspan="8">Nothing matches.</td></tr>';
+    <td class="num">${c.loose!=null?nf0.format(c.loose):'<span class="dash">—</span>'}</td><td class="num">${c.rpc?nf2.format(c.rpc):'<span class="dash">—</span>'}</td><td class="num">${nf2.format(c.amt||0)}</td></tr>`)});flush();
+  body.innerHTML=out.join('')||'<tr class="empty-row"><td colspan="8">Nothing matches.</td></tr>';
   $('#srFoot').innerHTML=rows.length?`<tr><td colspan="3" style="text-align:right;font-family:var(--f-body)">TOTAL · ${rows.length} products</td><td class="num">${nf0.format(t.pcs)}</td><td class="num hot">${nf0.format(t.ctn)}</td><td class="num">${nf0.format(t.loose)}</td><td></td><td class="num">${nf2.format(t.amt)}</td></tr>`:'';
   const all=report.rows.map(r=>({r,c:srCalc(r)}));
   $('#sCtn').textContent=nf0.format(all.reduce((s,x)=>s+(x.c.ctn||0),0));$('#sLoose').textContent=nf0.format(all.reduce((s,x)=>s+(x.c.loose||0),0));
@@ -762,7 +792,7 @@ function renderBrand(){
   document.querySelectorAll('.brand-co').forEach(e=>e.textContent=co);document.querySelectorAll('.brand-sub').forEach(e=>e.textContent=brand.sub||'');
   document.querySelectorAll('.brand-foot').forEach(e=>e.textContent=brand.foot||'');
   document.querySelectorAll('.brand-logo').forEach(lb=>{if(brand.logo){lb.className='logo-box brand-logo';lb.innerHTML=`<img src="${brand.logo}" alt="Logo">`}else{lb.className='logo-box brand-logo empty';lb.innerHTML='Add logo'}});
-  $('#pcoBox').innerHTML=brand.pcLogo||brand.pcName?`<div class="pco">${brand.pcLogo?`<img src="${brand.pcLogo}" alt="">`:''}${brand.pcName?`<div><small>Rate list of</small><b>${esc(brand.pcName)}</b></div>`:''}</div>`:'';
+  document.querySelectorAll('.pco-slot').forEach(el=>{el.innerHTML=brand.pcLogo||brand.pcName?`<div class="pco">${brand.pcLogo?`<img src="${brand.pcLogo}" alt="">`:''}${brand.pcName?`<div><small>${el.dataset.label}</small><b>${esc(brand.pcName)}</b></div>`:''}</div>`:''});
   $('#pcLogoPrev').innerHTML=brand.pcLogo?`<img src="${brand.pcLogo}" alt="Company logo">`:'<span style="color:var(--muted);font-size:12px">No logo</span>';
   $('#bLogoPrev').innerHTML=brand.logo?`<img src="${brand.logo}" alt="Logo">`:'<span style="color:var(--muted);font-size:12px">No logo</span>';
 }
