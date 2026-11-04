@@ -265,6 +265,8 @@ table.ph-off .ph{opacity:.35}
 .verify span{font-size:12px;color:var(--muted);font-weight:600}
 .verify .vres{margin-left:auto;font-weight:800}.verify.ok .vres{color:var(--good)}.verify.bad .vres{color:var(--bad)}
 .rep td.rawc{background:color-mix(in srgb,var(--navy) 6%,transparent);font-weight:800;color:var(--navy)}
+.pkv{display:none}
+@media print{.sheet input.pk{display:none!important}.pkv{display:inline;font-family:var(--f-mono);font-weight:700}.rep tr.flash td{animation:none!important}.rep tbody tr:hover td{background:none}}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--head-bg);color:var(--head-fg);padding:10px 18px;border-radius:9px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.2s;z-index:20;max-width:calc(100% - 32px)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -277,7 +279,7 @@ table.ph-off .ph{opacity:.35}
     --bad-bg:#fff!important;--good:#16794a!important;color-scheme:light!important}
   @page{size:A4 portrait;margin:10mm}
   body{background:#fff;background-image:none}
-  body::before,.topbar,.no-print,.entry,.tiles,.toolbar,.upload,.a4tag,.appfoot,.toast,.card{display:none!important}
+  body::before,.topbar,.no-print,.entry,.tiles,.toolbar,.upload,.a4tag,.appfoot,.toast,.card,.verify,.laybar,.savebar,.cloudpill{display:none!important}
   main{padding:0}.wrap{max-width:none;padding:0}
   .sheet{width:auto;min-height:0;box-shadow:none;margin:0;border-radius:0}
   .sheet-head{padding:0 0 4mm}.tape{padding:6px 4mm}.tbl-wrap{padding:0}
@@ -286,7 +288,7 @@ table.ph-off .ph{opacity:.35}
   .pk{border:0!important;background:transparent!important;width:auto;padding:0}
   .pk::placeholder{color:transparent}
   .x,.phx,.del{display:none!important}
-  .thumb{border:0}.thumb:not(.has){visibility:hidden}
+  .thumb{border:0;width:38px;height:38px}.thumb:not(.has){display:none}table.no-photos .ph{display:none}.rep td{padding-block:4px}
   .rep tr{break-inside:avoid}
   thead{display:table-header-group}tfoot{display:table-row-group}
   .sheet-foot{padding:12mm 0 0}
@@ -606,7 +608,7 @@ function renderList(){
       <td class="num"><input class="pk rt rl" data-k="${esc(k)}" data-f="pc" type="number" min="0" step="any" inputmode="decimal" value="${pc?r2(pc):''}" placeholder="—" aria-label="Piece rate ${esc(m.name)}"></td>
       <td class="del"><button class="x" data-del="${esc(k)}" title="Delete product" aria-label="Delete ${esc(m.name)}">×</button></td></tr>`;
   });
-  $('#rlTable').classList.toggle('ph-off',!$('#showPh').checked);
+  $('#rlTable').classList.toggle('ph-off',!$('#showPh').checked);$('#rlTable').classList.toggle('no-photos',!rows.some(r=>photos[r.k]));
   $('#rlBody').innerHTML=html||'<tr class="empty-row"><td colspan="7"><b>No products here</b>Add one above, or clear the search.</td></tr>';
   flashKey=null;
   const all=Object.values(master);
@@ -767,7 +769,13 @@ $('#rlPdf').onclick=async()=>{
   if(doc.putTotalPages)doc.putTotalPages('{total}');
   doc.save(`Rate-List-${listDate()}.pdf`);toast('PDF downloaded');
 };
-$('#rlPrint').onclick=$('#srPrint').onclick=()=>{if(document.activeElement)document.activeElement.blur();setTimeout(()=>window.print(),50)};
+/* print: plain text instead of input boxes, extra fonts removed */
+function prepPrint(){dropFontPreviews();document.querySelectorAll('.pkv').forEach(x=>x.remove());
+  document.querySelectorAll('.panel:not([hidden]) .sheet input.pk').forEach(i=>{const sp=document.createElement('span');sp.className='pkv';const v=i.value;
+    sp.textContent=v===''?'—':(i.classList.contains('rt')?nf2.format(+v):v);i.after(sp)})}
+function endPrint(){document.querySelectorAll('.pkv').forEach(x=>x.remove())}
+window.addEventListener('beforeprint',prepPrint);window.addEventListener('afterprint',endPrint);
+$('#rlPrint').onclick=$('#srPrint').onclick=()=>{if(document.activeElement)document.activeElement.blur();prepPrint();if(layEdit)setLayEdit(false);requestAnimationFrame(()=>window.print())};
 $('#rlXls').onclick=()=>{
   const aoa=[[brand.company||'Your Company'],[(brand.listTitle||'Rate List')+' · '+fmtDate(listDate())],[],['#','Product','Category','Packing (pcs/ctn)','Rate / Carton','Rate / Piece','Updated']];
   listRows().forEach(({m},i)=>{const c=ctnOf(m),p=pcOf(m);aoa.push([i+1,m.name,m.cat||'',okP(m)||'',c?+c.toFixed(2):'',p?+p.toFixed(2):'',m.updated?fmtDate(m.updated):''])});
@@ -922,9 +930,11 @@ const FEAT=['Archivo Black','Anton','Bebas Neue','Oswald','Montserrat','Poppins'
 const fByName=n=>ALLF.find(f=>f.name===n);
 function curFont(){return fByName(OLDF[brand.headFont]||brand.headFont)||fByName('Archivo Black')||{name:'Archivo Black',w:400,cat:'s'}}
 const loaded=new Set(['Archivo Black','Archivo','JetBrains Mono']);
-function loadFont(f){if(!f||loaded.has(f.name))return;loaded.add(f.name);const l=document.createElement('link');l.rel='stylesheet';
+function loadFont(f,prev){if(!f||loaded.has(f.name))return;loaded.add(f.name);const l=document.createElement('link');l.rel='stylesheet';if(prev){l.className='fprev';l.dataset.family=f.name}
   l.href='https://fonts.googleapis.com/css2?family='+encodeURIComponent(f.name).replace(/%20/g,'+')+(f.w!==400?':wght@'+f.w:'')+'&display=swap';document.head.appendChild(l)}
 function applyFont(){const f=curFont();loadFont(f);document.documentElement.style.setProperty('--f-display',`"${f.name}","Arial Black",Impact,sans-serif`);document.documentElement.style.setProperty('--dw',f.w)}
+/* drop font previews when leaving Settings — hundreds of loaded fonts make printing slow */
+function dropFontPreviews(){const cur=curFont().name;document.querySelectorAll('link.fprev').forEach(l=>{if(l.dataset.family!==cur){loaded.delete(l.dataset.family);l.remove()}})}
 let fontShown=48;const FCATN={s:'Sans serif',r:'Serif',d:'Display',h:'Handwriting',m:'Monospace'};
 function fontMatches(){const q=$('#fontQ').value.trim().toLowerCase(),c=$('#fontCat').value;
   let l=ALLF.filter(f=>(!q||f.name.toLowerCase().includes(q))&&(!c||(c==='a'?f.ar:f.cat===c)));
@@ -932,7 +942,7 @@ function fontMatches(){const q=$('#fontQ').value.trim().toLowerCase(),c=$('#font
   return l}
 function renderFonts(){
   const sample=$('#fontSample').value.trim()||brand.company||brand.pcName||'Al Qadir Traders';const cur=curFont().name;
-  const l=fontMatches(),show=l.slice(0,fontShown);show.forEach(loadFont);
+  const l=fontMatches(),show=l.slice(0,fontShown);show.forEach(f=>loadFont(f,true));
   $('#fontCur').textContent=cur;
   $('#fontCount').textContent=l.length?`Showing ${show.length} of ${nf0.format(l.length)} fonts${l.length<ALLF.length?' (filtered)':''}`:'No font matches — try another name or style';
   $('#fontGrid').innerHTML=show.map(f=>`<button type="button" class="fontopt" data-font="${esc(f.name)}" aria-pressed="${f.name===cur}"><span class="pv" style="font-family:'${f.name}',sans-serif;font-weight:${f.w}">${esc(sample)}</span><small>${esc(f.name)} · ${f.ar?'Urdu/Arabic':FCATN[f.cat]}${f.name==='Archivo Black'?' · default':''}</small></button>`).join('');
@@ -1125,7 +1135,7 @@ $('#fbCfgDel').onclick=()=>{try{localStorage.removeItem('cs_fbcfg')}catch(e){}if
 /* ---------- tabs + boot ---------- */
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===b));
-  ['rl','sr','st'].forEach(t=>$('#p-'+t).hidden=t!==b.dataset.tab);try{localStorage.setItem('cs_tab3',b.dataset.tab)}catch(e){}
+  ['rl','sr','st'].forEach(t=>$('#p-'+t).hidden=t!==b.dataset.tab);if(b.dataset.tab!=='st')dropFontPreviews();try{localStorage.setItem('cs_tab3',b.dataset.tab)}catch(e){}
 }));
 if(framed){document.querySelectorAll('[data-top]').forEach(b=>b.hidden=true);$('#frameNote').hidden=false}
 function renderAll(){renderCats();renderBrand();renderList();renderStock()}
