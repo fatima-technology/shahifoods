@@ -224,7 +224,9 @@ table.ph-off .ph{opacity:.35}
 .rep tr.sub td{font-weight:800;border-bottom:2px solid var(--line);background:var(--surface-2)}
 @media print{table.ph-off .ph{display:none}}
 .tab svg{width:16px;height:16px;flex:none}
-@media (max-width:480px){.tab{padding:7px 10px;gap:5px}.tab svg{width:15px;height:15px}}
+.tab{white-space:nowrap}.tabs{max-width:100%;overflow-x:auto;scrollbar-width:none}
+@media (max-width:520px){.tabs{width:100%}.tab{flex:1;justify-content:center;padding:7px 6px;gap:4px;font-size:12.5px}.tab svg{width:14px;height:14px}}
+@media (max-width:430px){.tab svg{display:none}}
 /* movable header */
 .sheet-head.lay{position:relative;display:block;height:40mm;margin:9mm 12mm 4mm;padding:0}
 .lay .el{position:absolute;--s:1;touch-action:none;line-height:1.1}
@@ -267,6 +269,9 @@ table.ph-off .ph{opacity:.35}
 .rep td.rawc{background:color-mix(in srgb,var(--navy) 6%,transparent);font-weight:800;color:var(--navy)}
 .pkv{display:none}
 @media print{.sheet input.pk{display:none!important}.pkv{display:inline;font-family:var(--f-mono);font-weight:700}.rep tr.flash td{animation:none!important}.rep tbody tr:hover td{background:none}}
+.cc-entry{grid-template-columns:minmax(0,2.4fr) repeat(2,minmax(0,1fr)) auto}
+@media (max-width:900px){.cc-entry{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.rep td.big{font-size:13.5px;font-weight:800;color:var(--navy)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--head-bg);color:var(--head-fg);padding:10px 18px;border-radius:9px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.2s;z-index:20;max-width:calc(100% - 32px)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -303,11 +308,12 @@ table.ph-off .ph{opacity:.35}
   <div class="wrap">
     <div class="brand">
       <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg></div>
-      <div><h1>CARTON RATE LIST<span class="ver">v3.5</span></h1><small>Carton rate · Piece rate · Packing</small></div>
+      <div><h1>CARTON RATE LIST<span class="ver">v3.6</span></h1><small>Carton rate · Piece rate · Packing</small></div>
     </div>
     <button class="cloudpill" id="cloudPill" data-st="off" type="button" title="Cloud sync"><i></i><span id="cloudTxt">Cloud off</span></button>
     <nav class="tabs" role="tablist">
       <button class="tab" role="tab" id="tab-rl" aria-selected="true" data-tab="rl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="8" cy="8" r="1.6"/></svg><span>Rate List</span></button>
+      <button class="tab" role="tab" id="tab-cc" aria-selected="false" data-tab="cc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M8.5 6.5h7M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h3.5"/></svg><span>Calculator</span></button>
       <button class="tab" role="tab" id="tab-sr" aria-selected="false" data-tab="sr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg><span>Stock Report</span></button>
       <button class="tab" role="tab" id="tab-st" aria-selected="false" data-tab="st"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Settings</span></button>
     </nav>
@@ -375,6 +381,54 @@ table.ph-off .ph{opacity:.35}
     <div class="sheet-foot"><span class="brand-foot"></span><span>Rates are purchase prices · Packing = pieces per carton</span></div>
   </article>
   <input type="file" id="photoFile" accept="image/*" hidden>
+</section>
+
+<!-- ================= CARTON CALCULATOR ================= -->
+<section class="panel" id="p-cc" hidden>
+  <form class="entry cc-entry" id="cForm" autocomplete="off">
+    <h3>Cartons → pieces <span>Packing and rates come from your rate list</span></h3>
+    <div class="wide2 ac"><label class="f" for="cName">Product</label>
+      <input class="inp" id="cName" placeholder="Start typing — e.g. ELAICHI" role="combobox" aria-autocomplete="list" aria-controls="cAcList">
+      <ul class="ac-list" id="cAcList" role="listbox" hidden></ul></div>
+    <div><label class="f" for="cCtn">Cartons</label><input class="inp" id="cCtn" type="number" min="0" step="any" inputmode="decimal" placeholder="0"></div>
+    <div><label class="f" for="cLoose">Loose pcs</label><input class="inp" id="cLoose" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></div>
+    <div><button class="btn red" type="submit" style="height:40px">+ Add</button></div>
+    <div class="live" id="cLive">Pick a product and type the cartons — pieces and amount show here.</div>
+  </form>
+  <div class="tiles">
+    <div class="tile"><div class="lbl">Cartons</div><div class="val" id="kCtn">0</div><div class="sub" id="kLoose">+ 0 loose pcs</div></div>
+    <div class="tile"><div class="lbl">Total pieces</div><div class="val" id="kPcs">0</div><div class="sub">cartons × packing</div></div>
+    <div class="tile hero"><div class="lbl">Total amount</div><div class="val" id="kAmt">Rs 0</div><div class="sub" id="kN">0 products</div></div>
+    <div class="tile warn"><div class="lbl">Missing</div><div class="val" id="kMiss">0</div><div class="sub">packing or rate needed</div></div>
+  </div>
+  <div class="toolbar">
+    <div class="field" title="Date printed on this sheet"><span style="font-size:12px;font-weight:800;opacity:.75">Date</span><input id="ccDateIn" type="date" aria-label="Date"></div>
+    <button class="btn sm" type="button" id="ccClear">Clear list</button>
+    <span class="spacer"></span>
+    <button class="btn sm" type="button" id="ccLay">Move logo &amp; name</button>
+    <button class="btn sm" data-top id="ccXls">Excel</button>
+    <button class="btn sm" data-top id="ccPrint">Print</button>
+    <button class="btn sm red" data-top id="ccPdf">Download PDF</button>
+  </div>
+  <span class="a4tag">A4 page</span>
+  <div class="laybar" hidden><span>Drag the logo, names and date to place them.</span><span>Selected: <b class="lsel">tap an item</b></span><button class="btn sm lsz" data-d="-1" type="button">− Smaller</button><button class="btn sm lsz" data-d="1" type="button">+ Bigger</button><span class="sp"></span><button class="btn sm lreset" type="button">Reset</button><button class="btn sm red ldone" type="button">Done</button></div>
+  <article class="sheet">
+    <div class="sheet-head lay" data-pclabel="Rate list of">
+      <div class="el el-logo" data-el="logo"></div>
+      <div class="el el-name" data-el="name"><h2 class="brand-co">Your Company</h2><p class="brand-sub"></p></div>
+      <div class="el el-pclogo" data-el="pclogo"></div>
+      <div class="el el-pcname" data-el="pcname"></div>
+      <div class="el el-date" data-el="date"><span>Date</span><b id="ccDate">—</b></div>
+    </div>
+    <div class="tape"><span>Carton Calculation</span><small id="ccCount"></small></div>
+    <div class="tbl-wrap">
+      <table class="rep">
+        <thead><tr><th>#</th><th>Product</th><th class="num">Packing<small>pcs / ctn</small></th><th class="num">Cartons</th><th class="num">Loose<small>pcs</small></th><th class="num">Total<small>pieces</small></th><th class="num">Rate<small>per carton</small></th><th class="num">Amount<small>Rs</small></th><th class="del"></th></tr></thead>
+        <tbody id="ccBody"></tbody><tfoot id="ccFoot"></tfoot>
+      </table>
+    </div>
+    <div class="sheet-foot"><span>Prepared by ____________</span><span class="brand-foot"></span></div>
+  </article>
 </section>
 
 <!-- ================= STOCK REPORT ================= -->
@@ -514,7 +568,7 @@ service cloud.firestore {
   <div class="savebar" id="saveBar"><span class="st" id="saveSt">All settings saved</span><button class="btn" id="bDiscard">Undo changes</button><button class="btn red" id="bSave">Save settings</button></div>
 </section>
 
-<footer class="appfoot no-print"><span><b>FATIMA-TECH</b> · Carton Rate List v3.5</span><span>Saved in this browser · make a backup from Settings</span></footer>
+<footer class="appfoot no-print"><span><b>FATIMA-TECH</b> · Carton Rate List v3.6</span><span>Saved in this browser · make a backup from Settings</span></footer>
 </main>
 <div class="toast" id="toast" role="status"></div>
 
@@ -532,6 +586,7 @@ let photos=LS.get('cs_photos',{});     // KEY -> small jpeg dataURL
 const defBrand=()=>({company:'',sub:'',listTitle:'Rate List',foot:'',logo:'',pcName:'',pcLogo:'',headFont:'archivo'});
 let brand=Object.assign(defBrand(),LS.get('cs_brand',{}));
 let report=LS.get('cs_report',null);if(report&&report.demo)report=null;
+let calc=Object.assign({date:'',lines:[]},LS.get('cs_calc',{}));
 var cloud=null;function cq(w){if(cloud)cloud.queue(w)}
 
 /* ---------- helpers ---------- */
@@ -783,6 +838,102 @@ $('#rlXls').onclick=()=>{
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Rate List');XLSX.writeFile(wb,`Rate-List-${listDate()}.xlsx`);
 };
 
+/* ================= CARTON CALCULATOR: cartons -> pieces + amount ================= */
+const saveCalc=()=>{LS.set('cs_calc',calc);cq('calc')};
+function ccLine(l){const m=master[l.k]||{name:l.name||l.k};const P=okP(m),cR=ctnOf(m),pR=pcOf(m),ctn=+l.ctn||0,loose=+l.loose||0;
+  const pcs=P?ctn*P+loose:(loose&&!ctn?loose:null);
+  let amt=null;if(cR)amt=ctn*cR+loose*(pR||0);else if(pR&&pcs!=null)amt=pcs*pR;
+  return{m,P,cR,pR,ctn,loose,pcs,amt}}
+function renderCalc(){
+  const d=calc.date||today();$('#ccDateIn').value=d;$('#ccDate').textContent=fmtDate(d);
+  const t={ctn:0,loose:0,pcs:0,amt:0,miss:0};
+  const rows=calc.lines.map((l,i)=>{const c=ccLine(l);t.ctn+=c.ctn;t.loose+=c.loose;t.pcs+=c.pcs||0;t.amt+=c.amt||0;if(!c.P||c.amt==null)t.miss++;
+    return `<tr><td class="idx">${i+1}</td><td class="name">${esc(c.m.name)}${c.m.cat?`<small>${esc(c.m.cat)}</small>`:''}</td>
+    <td class="num">${c.P?c.P:`<input class="pk ccP need" data-k="${esc(l.k)}" type="number" min="1" step="1" inputmode="numeric" placeholder="needed" aria-label="Packing ${esc(c.m.name)}">`}</td>
+    <td class="num hot"><input class="pk ccI" data-i="${i}" data-f="ctn" type="number" min="0" step="any" inputmode="decimal" value="${l.ctn||''}" aria-label="Cartons ${esc(c.m.name)}"></td>
+    <td class="num"><input class="pk ccI" data-i="${i}" data-f="loose" type="number" min="0" step="1" inputmode="numeric" value="${l.loose||''}" placeholder="0" aria-label="Loose ${esc(c.m.name)}"></td>
+    <td class="num big">${c.pcs!=null?nf0.format(c.pcs):'<span class="dash">—</span>'}</td>
+    <td class="num">${c.cR?nf2.format(c.cR):`<input class="pk rt ccR need" data-k="${esc(l.k)}" type="number" min="0" step="any" inputmode="decimal" placeholder="needed" aria-label="Carton rate ${esc(c.m.name)}">`}</td>
+    <td class="num" style="font-weight:800">${c.amt!=null?nf2.format(c.amt):'<span class="dash">—</span>'}</td>
+    <td class="del"><button class="x" data-rm="${i}" title="Remove" aria-label="Remove ${esc(c.m.name)}">×</button></td></tr>`});
+  $('#ccBody').innerHTML=rows.join('')||`<tr class="empty-row"><td colspan="9"><b>No products yet</b>Pick a product above, type the cartons and press Add. Pieces and the amount add up here.</td></tr>`;
+  $('#ccFoot').innerHTML=calc.lines.length?`<tr><td colspan="3" style="text-align:right;font-family:var(--f-body)">TOTAL · ${calc.lines.length} products</td><td class="num hot">${fQ(t.ctn)}</td><td class="num">${nf0.format(t.loose)}</td><td class="num">${nf0.format(t.pcs)}</td><td></td><td class="num">${nf2.format(t.amt)}</td><td class="del"></td></tr>`:'';
+  $('#kCtn').textContent=fQ(t.ctn);$('#kLoose').textContent=`+ ${nf0.format(t.loose)} loose pcs`;$('#kPcs').textContent=nf0.format(t.pcs);
+  $('#kAmt').textContent='Rs '+nf2.format(t.amt);$('#kN').textContent=`${calc.lines.length} products`;$('#kMiss').textContent=t.miss;
+  $('#ccCount').textContent=`${calc.lines.length} products · ${fQ(t.ctn)} ctn · ${nf0.format(t.pcs)} pcs`;
+  return t;
+}
+let ccPick=null;
+function ccLive(){
+  const name=$('#cName').value.trim();ccPick=name?findMatch(name):null;const ctn=+$('#cCtn').value||0,loose=+$('#cLoose').value||0;
+  if(!name){$('#cLive').textContent='Pick a product and type the cartons — pieces and amount show here.';return}
+  if(!ccPick){$('#cLive').innerHTML='This product is not in your rate list — add it on the Rate List tab first.';return}
+  const c=ccLine({k:ccPick.key,ctn,loose});let h=`<b>${esc(c.m.name)}</b> · `;
+  h+=c.P?`${c.P} pcs/carton`:'<span class="warn-t">packing not saved yet</span>';
+  h+=c.cR?` · Rs ${nf2.format(c.cR)}/carton`:' · <span class="warn-t">no carton rate</span>';
+  if(ctn||loose)h+=`<br>${fQ(ctn)} ctn${c.P?' × '+c.P:''}${loose?' + '+loose+' loose':''} = <b class="big">${c.pcs!=null?nf0.format(c.pcs)+' pieces':'—'}</b>${c.amt!=null?` · Amount <b>Rs ${nf2.format(c.amt)}</b>`:''}`;
+  $('#cLive').innerHTML=h;
+}
+$('#cName').addEventListener('input',ccLive);['cCtn','cLoose'].forEach(id=>$('#'+id).addEventListener('input',ccLive));
+$('#cForm').addEventListener('submit',e=>{
+  e.preventDefault();if(cAcOpen()&&document.activeElement===$('#cName')){cAcPick();return}cAcClose();
+  const name=$('#cName').value.trim();if(!name){toast('Pick a product');return}
+  const hit=findMatch(name);if(!hit){toast('Not in your rate list — add it on the Rate List tab first');return}
+  const ctn=+$('#cCtn').value||0,loose=+$('#cLoose').value||0;if(!ctn&&!loose){toast('Type the cartons');return}
+  const ex=calc.lines.find(l=>l.k===hit.key);if(ex){ex.ctn=(+ex.ctn||0)+ctn;ex.loose=(+ex.loose||0)+loose}else calc.lines.push({k:hit.key,ctn,loose});
+  saveCalc();const t=renderCalc();const c=ccLine({k:hit.key,ctn,loose});
+  toast(`${hit.m.name}: ${c.pcs!=null?nf0.format(c.pcs)+' pcs':'packing needed'}${ex?' (added to the same line)':''} · Total Rs ${nf2.format(t.amt)}`);
+  ['cName','cCtn','cLoose'].forEach(id=>$('#'+id).value='');ccLive();$('#cName').focus();
+});
+$('#ccBody').addEventListener('change',e=>{const el=e.target;
+  if(el.classList.contains('ccI')){const l=calc.lines[+el.dataset.i];if(l){l[el.dataset.f]=+el.value||0;saveCalc();renderCalc()}}
+  else if(el.classList.contains('ccP')){const m=master[el.dataset.k],v=+el.value;if(m&&v>0){m.packing=v;m.guess=false;m.src='manual';if(m.ctnRate)m.rate=m.ctnRate/v;else if(m.rate)m.ctnRate=m.rate*v;m.updated=today();saveMaster();renderAll();toast(`${m.name}: packing ${v} saved to the rate list`)}}
+  else if(el.classList.contains('ccR')){const m=master[el.dataset.k],v=+el.value;if(m&&v>0){m.ctnRate=v;if(okP(m))m.rate=v/okP(m);m.updated=today();saveMaster();renderAll();toast(`${m.name}: carton rate saved to the rate list`)}}
+});
+$('#ccBody').addEventListener('click',e=>{const b=e.target.closest('button[data-rm]');if(!b)return;const [l]=calc.lines.splice(+b.dataset.rm,1);saveCalc();renderCalc();toast(`${(master[l.k]||{}).name||'Line'} removed`)});
+$('#ccDateIn').addEventListener('change',e=>{calc.date=e.target.value;saveCalc();renderCalc()});
+let ccArmed=false;$('#ccClear').onclick=()=>{if(!calc.lines.length)return;if(!ccArmed){ccArmed=true;$('#ccClear').textContent='Tap again to clear';setTimeout(()=>{ccArmed=false;$('#ccClear').textContent='Clear list'},3000);return}
+  ccArmed=false;$('#ccClear').textContent='Clear list';calc={date:'',lines:[]};saveCalc();renderCalc();toast('List cleared')};
+/* product search for the calculator */
+const cAcBox=$('#cAcList');let cAcItems=[],cAcIdx=-1;
+const cAcOpen=()=>!cAcBox.hidden&&cAcIdx>=0,cAcClose=()=>{cAcBox.hidden=true;cAcIdx=-1};
+function cAcRender(){const q=$('#cName').value.trim();cAcItems=q?acSearch(q):[];
+  if(!cAcItems.length||(cAcItems.length===1&&keyOf(cAcItems[0][1].name)===keyOf(q))){cAcClose();return}
+  cAcIdx=Math.min(Math.max(cAcIdx,0),cAcItems.length-1);
+  cAcBox.innerHTML=cAcItems.map(([k,m],i)=>`<li role="option" data-i="${i}" class="${i===cAcIdx?'on':''}" aria-selected="${i===cAcIdx}"><span class="ac-l">${photos[k]?`<img src="${photos[k]}" alt="">`:'<span class="noimg"></span>'}<span class="ac-name">${esc(m.name)}<small>${esc(m.cat||'')}</small></span></span><span class="ac-meta">${okP(m)?`<span class="chip ok">${okP(m)}/ctn</span>`:'<span class="chip">no packing</span>'}${ctnOf(m)?`<span class="ac-rate">Rs ${nf2.format(ctnOf(m))}/ctn</span>`:''}</span></li>`).join('');
+  cAcBox.hidden=false}
+function cAcPick(i){i=i??cAcIdx;const it=cAcItems[i];if(!it)return;$('#cName').value=it[1].name;cAcClose();ccLive();$('#cCtn').focus()}
+$('#cName').addEventListener('input',()=>{cAcIdx=0;cAcRender()});$('#cName').addEventListener('focus',cAcRender);$('#cName').addEventListener('blur',()=>setTimeout(cAcClose,150));
+$('#cName').addEventListener('keydown',e=>{if(cAcBox.hidden)return;if(e.key==='ArrowDown'){e.preventDefault();cAcIdx=(cAcIdx+1)%cAcItems.length;cAcRender()}else if(e.key==='ArrowUp'){e.preventDefault();cAcIdx=(cAcIdx-1+cAcItems.length)%cAcItems.length;cAcRender()}else if(e.key==='Enter'&&cAcIdx>=0){e.preventDefault();cAcPick()}else if(e.key==='Escape')cAcClose()});
+cAcBox.addEventListener('mousedown',e=>{const li=e.target.closest('li');if(li){e.preventDefault();cAcPick(+li.dataset.i)}});
+/* exports */
+$('#ccPrint').onclick=()=>$('#rlPrint').onclick();
+$('#ccXls').onclick=()=>{if(!calc.lines.length){toast('Add a product first');return}
+  const aoa=[[brand.company||'Your Company'],[`Carton Calculation${brand.pcName?' · '+brand.pcName:''} · ${fmtDate(calc.date||today())}`],[],['#','Product','Packing (pcs/ctn)','Cartons','Loose pcs','Total pieces','Rate / carton','Amount']];
+  const t={ctn:0,loose:0,pcs:0,amt:0};
+  calc.lines.forEach((l,i)=>{const c=ccLine(l);t.ctn+=c.ctn;t.loose+=c.loose;t.pcs+=c.pcs||0;t.amt+=c.amt||0;aoa.push([i+1,c.m.name,c.P||'',c.ctn,c.loose,c.pcs??'',c.cR?+c.cR.toFixed(2):'',c.amt!=null?+c.amt.toFixed(2):''])});
+  aoa.push(['','TOTAL','',t.ctn,t.loose,t.pcs,'',+t.amt.toFixed(2)]);
+  const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=[{wch:4},{wch:40},{wch:10},{wch:9},{wch:9},{wch:12},{wch:12},{wch:14}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Calculation');XLSX.writeFile(wb,`Carton-Calculation-${calc.date||today()}.xlsx`)};
+$('#ccPdf').onclick=async()=>{
+  if(!calc.lines.length){toast('Add a product first');return}
+  if(!window.jspdf||!window.jspdf.jsPDF){toast('The PDF maker did not load — check the internet');return}
+  toast('Making PDF…');const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});const W=210,M=12,co=(brand.company||'Your Company').toUpperCase();
+  const t={ctn:0,loose:0,pcs:0,amt:0};const body=calc.lines.map((l,i)=>{const c=ccLine(l);t.ctn+=c.ctn;t.loose+=c.loose;t.pcs+=c.pcs||0;t.amt+=c.amt||0;
+    return[String(i+1),c.m.name,c.P?String(c.P):'—',fQ(c.ctn),c.loose?nf0.format(c.loose):'—',c.pcs!=null?nf0.format(c.pcs):'—',c.cR?nf2.format(c.cR):'—',c.amt!=null?nf2.format(c.amt):'—']});
+  const hd=await headerImage('cc','Carton Calculation',`${calc.lines.length} products · ${fQ(t.ctn)} ctn · ${nf0.format(t.pcs)} pcs`);doc.addImage(hd.url,'PNG',M,8,W-2*M,hd.h);
+  doc.autoTable({startY:8+hd.h+3,head:[['#','Product','Packing','Cartons','Loose','Total pcs','Rate / ctn','Amount']],body,
+    foot:[[{content:`TOTAL · ${calc.lines.length} products`,colSpan:3,styles:{halign:'right'}},fQ(t.ctn),nf0.format(t.loose),nf0.format(t.pcs),'',nf2.format(t.amt)]],
+    margin:{left:M,right:M,bottom:16,top:14},theme:'grid',showFoot:'lastPage',
+    styles:{font:'helvetica',fontSize:9,cellPadding:2.2,valign:'middle',lineColor:[225,217,215],lineWidth:.2,textColor:[20,18,22]},
+    headStyles:{fillColor:[20,18,22],textColor:255,fontStyle:'bold',fontSize:8.3},footStyles:{fillColor:[20,18,22],textColor:255,fontStyle:'bold'},
+    columnStyles:{0:{cellWidth:8,halign:'center',textColor:[110,100,104]},1:{fontStyle:'bold'},2:{cellWidth:16,halign:'right'},3:{cellWidth:17,halign:'right',fontStyle:'bold',textColor:[158,15,24],fillColor:[253,240,240]},4:{cellWidth:14,halign:'right'},5:{cellWidth:20,halign:'right',fontStyle:'bold',textColor:[27,36,64]},6:{cellWidth:22,halign:'right'},7:{cellWidth:28,halign:'right',fontStyle:'bold'}},
+    didParseCell:d=>{if((d.section==='head'||d.section==='foot')&&d.column.index>=2)d.cell.styles.halign='right'},
+    didDrawPage:d=>{const ph=doc.internal.pageSize.getHeight();doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(110,100,104);
+      doc.text(`${co} · Carton Calculation · ${fmtDate(calc.date||today())}`,M,ph-8);doc.text(`Page ${d.pageNumber} of {total}`,W-M,ph-8,{align:'right'})}});
+  if(doc.putTotalPages)doc.putTotalPages('{total}');doc.save(`Carton-Calculation-${calc.date||today()}.pdf`);toast('PDF downloaded');
+};
+
 /* ================= STOCK REPORT (pieces -> cartons) ================= */
 function parseNum(v){if(v==null||v==='')return 0;if(typeof v==='number')return v;const s=String(v).replace(/,/g,'').match(/-?\d+(\.\d+)?/);return s?parseFloat(s[0]):0}
 function parseMoney(v){return typeof v==='number'?v:parseNum(String(v??'').replace(/[^\d.,\-]/g,''))}
@@ -971,7 +1122,7 @@ function layStatus(){document.querySelectorAll('.lsel').forEach(b=>b.textContent
 function setLayEdit(on){layEdit=on;document.querySelectorAll('.lay').forEach(h=>h.classList.toggle('editing',on));document.querySelectorAll('.laybar').forEach(b=>b.hidden=!on);
   if(!on){laySel=null;saveBrand();toast('Layout saved')}layStatus();
   if(on){const sh=document.querySelector('.panel:not([hidden]) .laybar');if(sh)sh.scrollIntoView({behavior:'smooth',block:'start'})}}
-$('#rlLay').onclick=$('#srLay').onclick=()=>setLayEdit(!layEdit);
+$('#rlLay').onclick=$('#srLay').onclick=$('#ccLay').onclick=()=>setLayEdit(!layEdit);
 document.querySelectorAll('.ldone').forEach(b=>b.onclick=()=>setLayEdit(false));
 document.querySelectorAll('.lreset').forEach(b=>b.onclick=()=>{brand.layout={};applyLayout();layStatus();toast('Layout reset')});
 document.querySelectorAll('.lsz').forEach(b=>b.onclick=()=>{if(!laySel){toast('Tap an item first');return}const s0=lay()[laySel].s;setPos(laySel,{s:Math.round(Math.max(.4,Math.min(3,s0+(+b.dataset.d)*.1))*10)/10});layStatus()});
@@ -1005,8 +1156,8 @@ async function headerImage(kind,bandTitle,bandRight){
   if(brand.pcName){p=at('pcname');c.fillStyle='#5f565a';c.font=`800 ${pt(10*p.s)}px "Archivo",sans-serif`;try{c.letterSpacing=pt(.8*p.s)+'px'}catch(e){}
     tx((kind==='sr'?'STOCK OF':'RATE LIST OF'),p.x,p.y);try{c.letterSpacing='0px'}catch(e){}
     c.fillStyle='#141216';c.font=`${f.w} ${pt(17*p.s)}px ${HF}`;tx(brand.pcName.toUpperCase(),p.x,p.y+pt(10*p.s)*1.2+2)}
-  p=at('date');c.fillStyle='#5f565a';c.font=`600 ${pt(12*p.s)}px "Archivo",sans-serif`;tx(kind==='sr'?'Report date':'Updated',p.x,p.y);
-  c.fillStyle='#141216';c.font=`800 ${pt(15*p.s)}px "JetBrains Mono",monospace`;tx(kind==='sr'?fmtDate(report&&report.date):fmtDate(listDate()),p.x,p.y+pt(12*p.s)*1.25);
+  p=at('date');c.fillStyle='#5f565a';c.font=`600 ${pt(12*p.s)}px "Archivo",sans-serif`;tx({sr:'Report date',cc:'Date'}[kind]||'Updated',p.x,p.y);
+  c.fillStyle='#141216';c.font=`800 ${pt(15*p.s)}px "JetBrains Mono",monospace`;tx(kind==='sr'?fmtDate(report&&report.date):kind==='cc'?fmtDate(calc.date||today()):fmtDate(listDate()),p.x,p.y+pt(12*p.s)*1.25);
   const by=mm(Hm);c.fillStyle='#d0202b';c.fillRect(0,by,cv.width,mm(9));c.fillStyle='#141216';c.fillRect(0,by+mm(9),cv.width,mm(1.2));
   c.textBaseline='middle';c.fillStyle='#fff';c.font=`${f.w} ${pt(16)}px ${HF}`;try{c.letterSpacing=pt(1)+'px'}catch(e){}c.fillText(bandTitle.toUpperCase(),mm(4),by+mm(4.6));try{c.letterSpacing='0px'}catch(e){}
   c.font=`800 ${pt(11.5)}px "Archivo",sans-serif`;c.textAlign='right';c.fillText(bandRight,cv.width-mm(4),by+mm(4.6));
@@ -1054,7 +1205,7 @@ function setPill(st,txt){const p=$('#cloudPill');p.dataset.st=st;$('#cloudTxt').
 $('#cloudPill').onclick=()=>{$('#tab-st').click();setTimeout(()=>$('#cloudCard').scrollIntoView({behavior:'smooth',block:'start'}),50)};
 const Cloud={
   cfg:null,db:null,auth:null,user:null,timers:{},seen:{},photoSeen:{},unsub:[],ready:false,
-  docs:{master:()=>JSON.stringify(master),brand:()=>JSON.stringify(brand),report:()=>JSON.stringify(report||null),meta:()=>JSON.stringify({rlDate})},
+  docs:{master:()=>JSON.stringify(master),brand:()=>JSON.stringify(brand),report:()=>JSON.stringify(report||null),meta:()=>JSON.stringify({rlDate}),calc:()=>JSON.stringify(calc)},
   ref(name){return this.db.collection('users').doc(this.user.uid).collection('app').doc(name)},
   pref(k){return this.db.collection('users').doc(this.user.uid).collection('photos').doc(pid(k))},
   queue(w){if(!this.user||!this.ready)return;clearTimeout(this.timers[w]);setPill('syncing','Syncing…');this.timers[w]=setTimeout(()=>this.push(w),700)},
@@ -1073,13 +1224,14 @@ const Cloud={
     else if(name==='brand'){if(dirty)return;brand=Object.assign(defBrand(),v||{});LS.set('cs_brand',brand);fillBrand();applyFont()}
     else if(name==='report'){report=v;LS.set('cs_report',report)}
     else if(name==='meta'){rlDate=(v&&v.rlDate)||'';LS.set('cs_rldate',rlDate)}
+    else if(name==='calc'){calc=Object.assign({date:'',lines:[]},v||{});LS.set('cs_calc',calc)}
     this.seen[name]=j;
   },
   async firstSync(){
     setPill('syncing','Syncing…');
     const [app,ph]=await Promise.all([this.db.collection('users').doc(this.user.uid).collection('app').get(),this.db.collection('users').doc(this.user.uid).collection('photos').get()]);
     const localMaster=master,localPhotos=photos;
-    if(app.empty&&ph.empty){this.ready=true;['master','brand','report','meta','photos'].forEach(w=>this.push(w));toast('Cloud is empty — this device’s data uploaded');}
+    if(app.empty&&ph.empty){this.ready=true;['master','brand','report','meta','photos','calc'].forEach(w=>this.push(w));toast('Cloud is empty — this device’s data uploaded');}
     else{
       app.forEach(d=>this.apply(d.id,d.data().json));
       let added=0;for(const k in localMaster)if(!master[k]){master[k]=localMaster[k];added++}
@@ -1122,7 +1274,7 @@ $('#fbIn').onclick=()=>{if(!Cloud.auth){toast('Connect Firebase first (step 1)')
 $('#fbUp').onclick=()=>{if(!Cloud.auth){toast('Connect Firebase first (step 1)');return}const [a,b]=creds();Cloud.auth.createUserWithEmailAndPassword(a,b).then(()=>toast('Account created and signed in')).catch(authErr)};
 $('#fbReset').onclick=()=>{if(!Cloud.auth){toast('Connect Firebase first (step 1)');return}const a=creds()[0];if(!a){toast('Type your email first');return}Cloud.auth.sendPasswordResetEmail(a).then(()=>toast('Password reset email sent')).catch(authErr)};
 $('#fbOut').onclick=()=>{Cloud.auth&&Cloud.auth.signOut().then(()=>toast('Signed out — data stays on this device'))};
-$('#fbSyncNow').onclick=()=>{['master','brand','report','meta','photos'].forEach(w=>{Cloud.seen[w]=null;Cloud.push(w)});toast('Syncing everything')};
+$('#fbSyncNow').onclick=()=>{['master','brand','report','meta','photos','calc'].forEach(w=>{Cloud.seen[w]=null;Cloud.push(w)});toast('Syncing everything')};
 $('#fbCfgSave').onclick=()=>{let c;try{c=parseCfg($('#fbCfg').value)}catch(e){toast('Config not recognised — paste the whole firebaseConfig { … } part');return}
   LS.set('cs_fbcfg',c);if(window.firebase&&firebase.apps.length){toast('Config saved — reload the page to use the new project');return}cloud=Cloud;Cloud.start(c);toast('Firebase connected — now sign in')};
 $('#fbCfgDel').onclick=()=>{try{localStorage.removeItem('cs_fbcfg')}catch(e){}if(Cloud.auth)Cloud.auth.signOut();toast('Firebase disconnected on this device — reload the page');setPill('off','Cloud off')};
@@ -1135,10 +1287,10 @@ $('#fbCfgDel').onclick=()=>{try{localStorage.removeItem('cs_fbcfg')}catch(e){}if
 /* ---------- tabs + boot ---------- */
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===b));
-  ['rl','sr','st'].forEach(t=>$('#p-'+t).hidden=t!==b.dataset.tab);if(b.dataset.tab!=='st')dropFontPreviews();try{localStorage.setItem('cs_tab3',b.dataset.tab)}catch(e){}
+  ['rl','cc','sr','st'].forEach(t=>$('#p-'+t).hidden=t!==b.dataset.tab);if(b.dataset.tab!=='st')dropFontPreviews();try{localStorage.setItem('cs_tab3',b.dataset.tab)}catch(e){}
 }));
 if(framed){document.querySelectorAll('[data-top]').forEach(b=>b.hidden=true);$('#frameNote').hidden=false}
-function renderAll(){renderCats();renderBrand();renderList();renderStock()}
+function renderAll(){renderCats();renderBrand();renderList();renderStock();renderCalc()}
 applyFont();renderAll();
 try{const t=localStorage.getItem('cs_tab3');if(t&&t!=='rl'){const b=document.querySelector(`.tab[data-tab="${t}"]`);if(b)b.click()}}catch(e){}
 })();
