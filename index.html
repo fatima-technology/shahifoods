@@ -403,7 +403,7 @@ table.ph-off .ph{opacity:.35}
   <div id="invoiceReview" class="card" hidden style="margin-bottom:14px">
     <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap"><b id="invoiceStatus">Reading invoice…</b><span id="invoiceTotals" class="muted"></span></div>
     <p class="muted" style="font-size:12px;margin:6px 0 10px">Cartons and invoice line amounts come from the supplier invoice. Packing and your per-piece rate come from your Price List. Your amount = converted pieces × saved piece rate. Differences are shown before import; Stock Report and Price List are never changed.</p>
-    <div class="tbl-wrap"><table class="rep"><thead><tr><th>#</th><th>Invoice product</th><th>Cartons</th><th>Packing</th><th>Total pieces</th><th>Your piece rate</th><th>Your amount</th><th>Invoice amount</th><th>Difference</th><th>Price List match</th><th>Status</th></tr></thead><tbody id="invoiceRows"></tbody></table></div>
+    <div class="tbl-wrap"><table class="rep"><thead><tr><th>#</th><th>Invoice product</th><th>Unit mode</th><th>Cartons</th><th>Packing</th><th>Total pieces</th><th>Rate / selected unit</th><th>Your amount</th><th>Invoice amount</th><th>Difference</th><th>Price List match</th><th>Status</th></tr></thead><tbody id="invoiceRows"></tbody></table></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px"><button class="btn sm" type="button" id="invoiceCancel">Cancel</button><button class="btn sm red" type="button" id="invoiceImport">Import to Calculator</button></div>
   </div>
   <div class="tiles">
@@ -434,7 +434,7 @@ table.ph-off .ph{opacity:.35}
     <div class="tape"><span>Carton Calculation</span><small id="ccCount"></small></div>
     <div class="tbl-wrap">
       <table class="rep">
-        <thead><tr><th>#</th><th>Product</th><th class="num">Packing<small>pcs / ctn</small></th><th class="num">Cartons</th><th class="num">Loose<small>pcs</small></th><th class="num">Total<small>pieces</small></th><th class="num">Rate<small>per piece</small></th><th class="num">Amount<small>Rs</small></th><th class="del"></th></tr></thead>
+        <thead><tr><th>#</th><th>Product</th><th class="num">Unit mode</th><th class="num">Packing<small>pcs / ctn</small></th><th class="num">Cartons</th><th class="num">Loose<small>pcs</small></th><th class="num">Quantity<small>pcs / ctn</small></th><th class="num">Rate<small>per selected unit</small></th><th class="num">Amount<small>Rs</small></th><th class="del"></th></tr></thead>
         <tbody id="ccBody"></tbody><tfoot id="ccFoot"></tfoot>
       </table>
     </div>
@@ -445,7 +445,7 @@ table.ph-off .ph{opacity:.35}
 <!-- ================= STOCK REPORT ================= -->
 <section class="panel" id="p-sr" hidden>
   <div class="upload" id="drop">
-    <div class="txt"><b>Upload a stock report</b><span>Excel (.xlsx / .xls / .csv) with Product, Current stock and Stock value. Pieces become cartons using your saved packing, and piece rates go into the rate list.</span></div>
+    <div class="txt"><b>Upload a stock report</b><span>Excel (.xlsx / .xls / .csv) with Product, Current stock and Stock value. Imported stock quantities are reviewed in Calculator; choose Pieces or CTN manually for each product.</span></div>
     <input type="file" id="file" accept=".xlsx,.xls,.csv" hidden>
     <button class="btn primary" id="pick">Choose file</button>
   </div>
@@ -855,27 +855,32 @@ $('#rlXls').onclick=()=>{
 
 /* ================= CARTON CALCULATOR: cartons -> pieces + amount ================= */
 const saveCalc=()=>{LS.set('cs_calc',calc);cq('calc')};
-function ccLine(l){const m=master[l.k]||{name:l.name||l.k};const P=okP(m),cR=ctnOf(m),pR=(Number(m.rate)>0?Number(m.rate):null),ctn=+l.ctn||0,loose=+l.loose||0;
-  const pcs=P?ctn*P+loose:(loose&&!ctn?loose:null);
-  const amt=(pR&&pcs!=null)?pcs*pR:null;
-  return{m,P,cR,pR,ctn,loose,pcs,amt}}
+function ccMode(l,m){return l.mode==='ctn'||l.mode==='pcs'?l.mode:((m.ctnUnit||Number(m.rate)>=500)?'ctn':'pcs')}
+function ccLine(l){const m=master[l.k]||{name:l.name||l.k};const P=okP(m),cR=ctnOf(m),pR=(Number(m.rate)>0?Number(m.rate):null),ctn=+l.ctn||0,loose=+l.loose||0,mode=ccMode(l,m);
+  const pcs=mode==='pcs'?(P?ctn*P+loose:(loose&&!ctn?loose:null)):null;
+  const qty=mode==='ctn'?ctn:pcs;
+  const rate=mode==='ctn'?(cR||null):pR;
+  const amt=(rate!=null&&qty!=null)?qty*rate:null;
+  return{m,P,cR,pR,ctn,loose,mode,pcs,qty,rate,amt}}
+
 function renderCalc(){
   const d=calc.date||today();$('#ccDateIn').value=d;$('#ccDate').textContent=fmtDate(d);
-  const t={ctn:0,loose:0,pcs:0,amt:0,miss:0};
-  const rows=calc.lines.map((l,i)=>{const c=ccLine(l);t.ctn+=c.ctn;t.loose+=c.loose;t.pcs+=c.pcs||0;t.amt+=c.amt||0;if(!c.P||c.amt==null)t.miss++;
+  const t={ctn:0,loose:0,pcs:0,amt:0,miss:0,ctnLines:0};
+  const rows=calc.lines.map((l,i)=>{const c=ccLine(l);t.ctn+=c.ctn;t.loose+=c.mode==='pcs'?c.loose:0;t.pcs+=c.pcs||0;t.amt+=c.amt||0;if(c.mode==='ctn')t.ctnLines++;if(c.amt==null||(!c.P&&c.mode==='pcs'))t.miss++;
     return `<tr><td class="idx">${i+1}</td><td class="name">${esc(c.m.name)}${c.m.cat?`<small>${esc(c.m.cat)}</small>`:''}</td>
-    <td class="num">${c.P?c.P:`<input class="pk ccP need" data-k="${esc(l.k)}" type="number" min="1" step="1" inputmode="numeric" placeholder="needed" aria-label="Packing ${esc(c.m.name)}">`}</td>
+    <td class="num"><select class="pk ccMode" data-i="${i}" aria-label="Unit mode for ${esc(c.m.name)}"><option value="pcs" ${c.mode==='pcs'?'selected':''}>Pieces</option><option value="ctn" ${c.mode==='ctn'?'selected':''}>CTN</option></select></td>
+    <td class="num">${c.mode==='pcs'?(c.P?c.P:`<input class="pk ccP need" data-k="${esc(l.k)}" type="number" min="1" step="1" inputmode="numeric" placeholder="needed" aria-label="Packing ${esc(c.m.name)}">`):'—'}</td>
     <td class="num hot"><input class="pk ccI" data-i="${i}" data-f="ctn" type="number" min="0" step="any" inputmode="decimal" value="${l.ctn||''}" aria-label="Cartons ${esc(c.m.name)}"></td>
-    <td class="num"><input class="pk ccI" data-i="${i}" data-f="loose" type="number" min="0" step="1" inputmode="numeric" value="${l.loose||''}" placeholder="0" aria-label="Loose ${esc(c.m.name)}"></td>
-    <td class="num big">${c.pcs!=null?nf0.format(c.pcs):'<span class="dash">—</span>'}</td>
-    <td class="num">${c.pR?nf2.format(c.pR):`<input class="pk rt ccPC need" data-k="${esc(l.k)}" type="number" min="0" step="any" inputmode="decimal" placeholder="needed" aria-label="Piece rate ${esc(c.m.name)}">`}</td>
+    <td class="num">${c.mode==='pcs'?`<input class="pk ccI" data-i="${i}" data-f="loose" type="number" min="0" step="1" inputmode="numeric" value="${l.loose||''}" placeholder="0" aria-label="Loose ${esc(c.m.name)}">`:'—'}</td>
+    <td class="num big">${c.qty!=null?nf0.format(c.qty):'<span class="dash">—</span>'}</td>
+    <td class="num">${c.rate!=null?nf2.format(c.rate):`<span class="warn-t">rate missing</span>`}</td>
     <td class="num" style="font-weight:800">${c.amt!=null?nf2.format(c.amt):'<span class="dash">—</span>'}</td>
     <td class="del"><button class="x" data-rm="${i}" title="Remove" aria-label="Remove ${esc(c.m.name)}">×</button></td></tr>`});
-  $('#ccBody').innerHTML=rows.join('')||`<tr class="empty-row"><td colspan="9"><b>No products yet</b>Pick a product above, type the cartons and press Add. Pieces and the amount add up here.</td></tr>`;
-  $('#ccFoot').innerHTML=calc.lines.length?`<tr><td colspan="3" style="text-align:right;font-family:var(--f-body)">TOTAL · ${calc.lines.length} products</td><td class="num hot">${fQ(t.ctn)}</td><td class="num">${nf0.format(t.loose)}</td><td class="num">${nf0.format(t.pcs)}</td><td></td><td class="num">${nf2.format(t.amt)}</td><td class="del"></td></tr>`:'';
-  $('#kCtn').textContent=fQ(t.ctn);$('#kLoose').textContent=`+ ${nf0.format(t.loose)} loose pcs`;$('#kPcs').textContent=nf0.format(t.pcs);
-  $('#kAmt').textContent='Rs '+nf2.format(t.amt);$('#kN').textContent=`${calc.lines.length} products`;$('#kMiss').textContent=t.miss;
-  $('#ccCount').textContent=`${calc.lines.length} products · ${fQ(t.ctn)} ctn · ${nf0.format(t.pcs)} pcs`;
+  $('#ccBody').innerHTML=rows.join('')||`<tr class="empty-row"><td colspan="10"><b>No products yet</b>Pick a product above, type the cartons and press Add. Choose Pieces or CTN for every product.</td></tr>`;
+  $('#ccFoot').innerHTML=calc.lines.length?`<tr><td colspan="4" style="text-align:right;font-family:var(--f-body)">TOTAL · ${calc.lines.length} products</td><td class="num hot">${fQ(t.ctn)}</td><td class="num">${nf0.format(t.loose)}</td><td class="num">${nf0.format(t.pcs)} pcs · ${t.ctnLines} CTN lines</td><td></td><td class="num">${nf2.format(t.amt)}</td><td class="del"></td></tr>`:'';
+  $('#kCtn').textContent=fQ(t.ctn);$('#kLoose').textContent=`+ ${nf0.format(t.loose)} loose pcs`;
+  $('#kPcs').textContent=nf0.format(t.pcs);$('#kAmt').textContent='Rs '+nf2.format(t.amt);$('#kN').textContent=`${calc.lines.length} products`;
+  $('#kMiss').textContent=t.miss;$('#ccCount').textContent=`${calc.lines.length} products · ${fQ(t.ctn)} ctn · ${nf0.format(t.pcs)} pcs`;
   return t;
 }
 let ccPick=null;
@@ -901,7 +906,8 @@ $('#cForm').addEventListener('submit',e=>{
   ['cName','cCtn','cLoose'].forEach(id=>$('#'+id).value='');ccLive();$('#cName').focus();
 });
 $('#ccBody').addEventListener('change',e=>{const el=e.target;
-  if(el.classList.contains('ccI')){const l=calc.lines[+el.dataset.i];if(l){l[el.dataset.f]=+el.value||0;saveCalc();renderCalc()}}
+  if(el.classList.contains('ccMode')){const l=calc.lines[+el.dataset.i];if(l){l.mode=el.value;saveCalc();renderCalc()}}
+  else if(el.classList.contains('ccI')){const l=calc.lines[+el.dataset.i];if(l){l[el.dataset.f]=+el.value||0;saveCalc();renderCalc()}}
   else if(el.classList.contains('ccP')){const m=master[el.dataset.k],v=+el.value;if(m&&v>0){m.packing=v;m.guess=false;m.src='manual';if(m.ctnRate)m.rate=m.ctnRate/v;else if(m.rate)m.ctnRate=m.rate*v;m.updated=today();saveMaster();renderAll();toast(`${m.name}: packing ${v} saved to the rate list`)}}
   else if(el.classList.contains('ccPC')){const m=master[el.dataset.k],v=+el.value;if(m&&v>0){m.rate=v;if(okP(m))m.ctnRate=v*okP(m);m.updated=today();saveMaster();renderAll();toast(`${m.name}: piece rate saved to the rate list`)}}
 });
@@ -956,7 +962,8 @@ function suggestInvoiceMatch(name){
   const hit=findMatch(name);if(hit){const score=hit.exact?1:hit.sc;return score>=.72?{key:hit.key,score,source:'Price List'}:{key:'',score:0,source:''}}
   return{key:'',score:0,source:''}
 }
-function invoiceValuation(r){const m=r.matchKey?master[r.matchKey]:null;const P=m?okP(m):null;const rate=m&&Number(m.rate)>0?Number(m.rate):null;const pcs=P?Math.round((+r.ctn||0)*P):null;const yourAmount=(pcs!=null&&rate!=null)?pcs*rate:null;const invoiceAmount=Number.isFinite(+r.invoiceAmount)?+r.invoiceAmount:null;const diff=(yourAmount!=null&&invoiceAmount!=null)?yourAmount-invoiceAmount:null;return{m,P,rate,pcs,yourAmount,invoiceAmount,diff}}
+function invoiceMode(r,m){return r.mode==="ctn"||r.mode==="pcs"?r.mode:((m&&(m.ctnUnit||Number(m.rate)>=500))?"ctn":"pcs")}
+function invoiceValuation(r){const m=r.matchKey?master[r.matchKey]:null;const P=m?okP(m):null;const mode=invoiceMode(r,m);const rate=m?(mode==="ctn"?(ctnOf(m)>0?ctnOf(m):null):(Number(m.rate)>0?Number(m.rate):null)):null;const pcs=mode==="pcs"&&P?Math.round((+r.ctn||0)*P):null;const qty=mode==="ctn"?(+r.ctn||0):pcs;const yourAmount=(qty!=null&&rate!=null)?qty*rate:null;const invoiceAmount=Number.isFinite(+r.invoiceAmount)?+r.invoiceAmount:null;const diff=(yourAmount!=null&&invoiceAmount!=null)?yourAmount-invoiceAmount:null;return{m,P,mode,rate,pcs,qty,yourAmount,invoiceAmount,diff}}
 function renderInvoiceReview(){
   const safeMaster=Object.entries(master).filter(([,m])=>m&&typeof m==='object'&&typeof m.name==='string'&&m.name.trim()).sort((a,b)=>String(a[1].name||'').localeCompare(String(b[1].name||'')));
   const opts=safeMaster.map(([k,m])=>`<option value="${esc(k)}">${esc(m.name)}</option>`).join('');
@@ -964,21 +971,21 @@ function renderInvoiceReview(){
   $('#invoiceRows').innerHTML=invoiceDraft.map((r,i)=>{
     const v=invoiceValuation(r);invoiceTotal+=v.invoiceAmount||0;if(v.yourAmount!=null)yourTotal+=v.yourAmount;else missing++;
     if(v.diff!=null&&Math.abs(v.diff)>=0.01)mismatches++;
-    const status=!r.matchKey?'Select product':(!v.P?'Packing missing':(!v.rate?'Piece rate missing':(Math.abs(v.diff||0)<0.01?'Amount matched':'Amount differs')));
+    const status=!r.matchKey?'Select product':(v.mode==='pcs'&&!v.P?'Packing missing':(!v.rate?'Selected-unit rate missing':(Math.abs(v.diff||0)<0.01?'Amount matched':'Amount differs')));
     const cls=status==='Amount matched'?'good':(status==='Amount differs'?'warn-t':'bad-t');
-    return `<tr><td>${r.row}</td><td>${esc(r.name)}</td><td><input class="pk invQty" data-i="${i}" type="number" min="0" step="any" value="${r.ctn}" aria-label="Cartons"></td><td>${v.P??'—'}</td><td>${v.pcs==null?'—':nf0.format(v.pcs)}</td><td>${v.rate==null?'—':nf2.format(v.rate)}</td><td>${v.yourAmount==null?'—':nf2.format(v.yourAmount)}</td><td>${v.invoiceAmount==null?'—':nf2.format(v.invoiceAmount)}</td><td class="${v.diff!=null&&Math.abs(v.diff)>=.01?'warn-t':'good'}">${v.diff==null?'—':(v.diff>0?'+':'')+nf2.format(v.diff)}</td><td><select class="pk invMatch" data-i="${i}" style="min-width:155px"><option value="">Select Price List product</option>${opts}</select></td><td class="${cls}">${status}</td></tr>`
+    return `<tr><td>${r.row}</td><td>${esc(r.name)}</td><td><select class="pk invMode" data-i="${i}" aria-label="Unit mode"><option value="pcs" ${v.mode==='pcs'?'selected':''}>Pieces</option><option value="ctn" ${v.mode==='ctn'?'selected':''}>CTN</option></select></td><td><input class="pk invQty" data-i="${i}" type="number" min="0" step="any" value="${r.ctn}" aria-label="Cartons"></td><td>${v.mode==='pcs'?(v.P??'—'):'—'}</td><td>${v.pcs==null?'—':nf0.format(v.pcs)}</td><td>${v.rate==null?'—':nf2.format(v.rate)}</td><td>${v.yourAmount==null?'—':nf2.format(v.yourAmount)}</td><td>${v.invoiceAmount==null?'—':nf2.format(v.invoiceAmount)}</td><td class="${v.diff!=null&&Math.abs(v.diff)>=.01?'warn-t':'good'}">${v.diff==null?'—':(v.diff>0?'+':'')+nf2.format(v.diff)}</td><td><select class="pk invMatch" data-i="${i}" style="min-width:155px"><option value="">Select Price List product</option>${opts}</select></td><td class="${cls}">${status}</td></tr>`
   }).join('');
   invoiceDraft.forEach((r,i)=>{$(`#invoiceRows .invMatch[data-i="${i}"]`).value=r.matchKey});
   const diff=yourTotal-invoiceTotal;
   $('#invoiceStatus').textContent=`${invoiceDraft.length} rows · ${missing} need packing/rate/match · ${mismatches} amount differences`;
   $('#invoiceTotals').textContent=`Invoice: Rs ${nf2.format(invoiceTotal)} | Your calculated ${missing?'subtotal':'total'}: Rs ${nf2.format(yourTotal)} | Difference: ${missing?'Pending — complete missing Price List data':'Rs '+nf2.format(diff)}`;
-  $('#invoiceImport').disabled=invoiceDraft.some(r=>{const v=invoiceValuation(r);return !r.matchKey||!v.P||!v.rate||(+r.ctn||0)<0});
+  $('#invoiceImport').disabled=invoiceDraft.some(r=>{const v=invoiceValuation(r);return !r.matchKey||(v.mode==='pcs'&&!v.P)||!v.rate||(+r.ctn||0)<0});
   invReview.hidden=false;
 }
-$('#invoiceRows').addEventListener('change',e=>{const i=+e.target.dataset.i;if(!Number.isInteger(i)||!invoiceDraft[i])return;if(e.target.classList.contains('invMatch'))invoiceDraft[i].matchKey=e.target.value;else if(e.target.classList.contains('invQty'))invoiceDraft[i].ctn=Math.max(0,+e.target.value||0);renderInvoiceReview()});
+$('#invoiceRows').addEventListener('change',e=>{const i=+e.target.dataset.i;if(!Number.isInteger(i)||!invoiceDraft[i])return;if(e.target.classList.contains('invMatch')){invoiceDraft[i].matchKey=e.target.value;delete invoiceDraft[i].mode}else if(e.target.classList.contains('invMode'))invoiceDraft[i].mode=e.target.value;else if(e.target.classList.contains('invQty'))invoiceDraft[i].ctn=Math.max(0,+e.target.value||0);renderInvoiceReview()});
 async function processInvoice(file){if(!/\.pdf$/i.test(file.name)&&!/^image\//.test(file.type)){toast('Please upload a PDF, JPG or PNG invoice');return}invReview.hidden=false;$('#invoiceStatus').textContent='Reading invoice…';$('#invoiceRows').innerHTML='';$('#invoiceTotals').textContent='Please wait';$('#invoiceImport').disabled=true;try{let text='';if(file.type==='application/pdf'||/\.pdf$/i.test(file.name))text=await pdfInvoiceText(file);else text='';let rows=parseInvoiceRows(text);if(!rows.length){$('#invoiceStatus').textContent='Using image OCR…';text=await ocrInvoice(file);rows=parseInvoiceRows(text)}if(!rows.length)throw new Error('No product rows could be read. Try a clearer PDF or image.');invoiceDraft=rows.map(r=>{const hit=suggestInvoiceMatch(r.name);return{...r,matchKey:hit.key,confidence:hit.score}});renderInvoiceReview();toast(`${rows.length} product rows read — verify pieces and amount differences`)}catch(e){$('#invoiceStatus').textContent='Invoice could not be read';$('#invoiceTotals').textContent=e.message||'Check internet connection and try again';$('#invoiceRows').innerHTML='';$('#invoiceImport').disabled=true;toast('Invoice reading failed — '+(e.message||'try a clearer file'))}}
 $('#invoiceCancel').onclick=()=>{invoiceDraft=[];invReview.hidden=true};
-$('#invoiceImport').onclick=()=>{if(!invoiceDraft.length)return;let added=0;invoiceDraft.forEach(r=>{const qty=Math.max(0,+r.ctn||0);if(!qty)return;const key=r.matchKey;const existing=calc.lines.find(l=>l.k===key);if(existing)existing.ctn=(+existing.ctn||0)+qty;else calc.lines.push({k:key,ctn:qty,loose:0});added++});if(!added){toast('No valid carton quantities to import');return}calc.date=calc.date||today();saveCalc();renderCalc();invoiceDraft=[];invReview.hidden=true;toast(`${added} verified invoice rows imported into Calculator only`)};
+$('#invoiceImport').onclick=()=>{if(!invoiceDraft.length)return;let added=0;invoiceDraft.forEach(r=>{const qty=Math.max(0,+r.ctn||0);if(!qty)return;const key=r.matchKey;const existing=calc.lines.find(l=>l.k===key);if(existing)existing.ctn=(+existing.ctn||0)+qty;else calc.lines.push({k:key,ctn:qty,loose:0,mode:invoiceMode(r,master[key])});if(existing)existing.mode=invoiceMode(r,master[key]);added++});if(!added){toast('No valid carton quantities to import');return}calc.date=calc.date||today();saveCalc();renderCalc();invoiceDraft=[];invReview.hidden=true;toast(`${added} verified invoice rows imported into Calculator only`)};
 
 $('#cName').addEventListener('input',()=>{cAcIdx=0;cAcRender()});$('#cName').addEventListener('focus',cAcRender);$('#cName').addEventListener('blur',()=>setTimeout(cAcClose,150));
 $('#cName').addEventListener('keydown',e=>{if(cAcBox.hidden)return;if(e.key==='ArrowDown'){e.preventDefault();cAcIdx=(cAcIdx+1)%cAcItems.length;cAcRender()}else if(e.key==='ArrowUp'){e.preventDefault();cAcIdx=(cAcIdx-1+cAcItems.length)%cAcItems.length;cAcRender()}else if(e.key==='Enter'&&cAcIdx>=0){e.preventDefault();cAcPick()}else if(e.key==='Escape')cAcClose()});
@@ -986,11 +993,11 @@ cAcBox.addEventListener('mousedown',e=>{const li=e.target.closest('li');if(li){e
 /* exports */
 $('#ccPrint').onclick=()=>$('#rlPrint').onclick();
 $('#ccXls').onclick=()=>{if(!calc.lines.length){toast('Add a product first');return}
-  const aoa=[[brand.company||'Your Company'],[`Carton Calculation${brand.pcName?' · '+brand.pcName:''} · ${fmtDate(calc.date||today())}`],[],['#','Product','Packing (pcs/ctn)','Cartons','Loose pcs','Total pieces','Rate / carton','Amount']];
+  const aoa=[[brand.company||'Your Company'],[`Carton Calculation${brand.pcName?' · '+brand.pcName:''} · ${fmtDate(calc.date||today())}`],[],['#','Product','Mode','Packing (pcs/ctn)','Cartons','Loose pcs','Quantity (pcs/ctn)','Rate / selected unit','Amount']];
   const t={ctn:0,loose:0,pcs:0,amt:0};
-  calc.lines.forEach((l,i)=>{const c=ccLine(l);t.ctn+=c.ctn;t.loose+=c.loose;t.pcs+=c.pcs||0;t.amt+=c.amt||0;aoa.push([i+1,c.m.name,c.P||'',c.ctn,c.loose,c.pcs??'',c.pR?+c.pR.toFixed(2):'',c.amt!=null?+c.amt.toFixed(2):''])});
-  aoa.push(['','TOTAL','',t.ctn,t.loose,t.pcs,'',+t.amt.toFixed(2)]);
-  const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=[{wch:4},{wch:40},{wch:10},{wch:9},{wch:9},{wch:12},{wch:12},{wch:14}];
+  calc.lines.forEach((l,i)=>{const c=ccLine(l);t.ctn+=c.ctn;t.loose+=c.loose;t.pcs+=c.pcs||0;t.amt+=c.amt||0;aoa.push([i+1,c.m.name,c.mode==='ctn'?'CTN':'Pieces',c.mode==='pcs'?(c.P||''):'—',c.ctn,c.mode==='pcs'?c.loose:'—',c.qty??'',c.rate?+c.rate.toFixed(2):'',c.amt!=null?+c.amt.toFixed(2):''])});
+  aoa.push(['','TOTAL','','',t.ctn,t.loose,t.pcs,'',+t.amt.toFixed(2)]);
+  const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=[{wch:4},{wch:40},{wch:10},{wch:12},{wch:9},{wch:9},{wch:16},{wch:18},{wch:14}];
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Calculation');XLSX.writeFile(wb,`Carton-Calculation-${calc.date||today()}.xlsx`)};
 $('#ccPdf').onclick=async()=>{
   if(!calc.lines.length){toast('Add a product first');return}
@@ -1015,28 +1022,110 @@ $('#ccPdf').onclick=async()=>{
 function parseNum(v){if(v==null||v==='')return 0;if(typeof v==='number')return v;const s=String(v).replace(/,/g,'').match(/-?\d+(\.\d+)?/);return s?parseFloat(s[0]):0}
 function parseMoney(v){return typeof v==='number'?v:parseNum(String(v??'').replace(/[^\d.,\-]/g,''))}
 function parseWorkbook(wb,fileName){
+  const norm=v=>String(v??'').replace(/\u00a0/g,' ').replace(/[\r\n\t]+/g,' ').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
+  const num=v=>{if(typeof v==='number')return v;const x=String(v??'').replace(/[^\d.\-]/g,'');return x?Number(x):0};
+  const money=v=>num(v);
   for(const sn of wb.SheetNames){
-    const rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:null});
-    const hi=rows.findIndex(r=>r&&r.some(c=>typeof c==='string'&&/product|item|description/i.test(c)));if(hi<0)continue;
-    const h=rows[hi].map(c=>String(c??'').trim());const fi=(re,not)=>h.findIndex(c=>re.test(c)&&!(not&&not.test(c)));
-    const cN=fi(/product|item|description/i,/code|sku|categ/i)>=0?fi(/product|item|description/i,/code|sku|categ/i):fi(/product|item|description/i);
-    const cC=fi(/categ|group|brand/i),cS=fi(/stock|qty|quantity/i,/value|amount|price|rate/i),cV=fi(/value|amount/i);if(cS<0)continue;
-    let date=null;for(let i=0;i<hi;i++)(rows[i]||[]).forEach(c=>{if(!date&&c instanceof Date)date=new Date(c.getTime()+12*3600e3).toISOString().slice(0,10)});
-    const out=[];
-    let fileTotal=null;
-    for(let i=hi+1;i<rows.length;i++){const r=rows[i];if(!r)continue;const name=r[cN];
-      if(name==null||!String(name).trim()||/^total/i.test(String(name).trim())){if(r[cS]!=null&&r[cS]!==''&&!fileTotal)fileTotal={qty:parseNum(r[cS]),value:cV>=0?parseMoney(r[cV]):0};continue}
-      const sv=r[cS];out.push({raw:String(sv??'').trim(),name:String(name).trim(),cat:cC>=0&&r[cC]?String(r[cC]).trim():'',qty:parseNum(sv),unit:/ctn|carton/i.test(String(sv))?'ctn':'pc',value:cV>=0?parseMoney(r[cV]):0})}
-    if(out.length)return{date:date||today(),file:fileName,rows:out,fileTotal};
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,cellDates:true,defval:null});
+    let hi=-1;
+    for(let i=0;i<Math.min(rows.length,50);i++){
+      const h=(rows[i]||[]).map(norm);
+      const hasProduct=h.some(x=>/^(product|product name|item|item name|description)$/.test(x));
+      const hasStock=h.some(x=>/^(current stock|current stock qty|stock|stock qty|quantity|qty|available stock)$/.test(x));
+      if(hasProduct&&hasStock){hi=i;break}
+    }
+    if(hi<0)continue;
+    const h=rows[hi].map(norm);
+    const find=(tests,exclude=[])=>h.findIndex(x=>tests.some(re=>re.test(x))&&!exclude.some(re=>re.test(x)));
+    const cN=find([/^product$/, /^product name$/, /^item$/, /^item name$/, /^description$/]);
+    const cSku=find([/^sku$/, /item code/, /product code/]);
+    const cC=find([/category/,/group/,/^brand$/]);
+    const cS=find([/^current stock$/, /^current stock qty$/, /^stock$/, /^stock qty$/, /^quantity$/, /^qty$/, /available stock/]);
+    const cUP=find([/^unit purchase price$/, /purchase price per unit/, /^unit price$/, /unit purchase rate/]);
+    const cV=find([/current stock value/,/total purchase amount/,/purchase amount/,/total stock value/,/^stock value$/, /^total value$/, /^amount$/], [/unit/,/per unit/]);
+    if(cN<0||cS<0)continue;
+    let date=null;
+    for(let i=0;i<hi;i++)(rows[i]||[]).forEach(c=>{if(!date&&c instanceof Date)date=new Date(c.getTime()+12*3600e3).toISOString().slice(0,10)});
+    const out=[];let fileTotal=null;
+    for(let i=hi+1;i<rows.length;i++){
+      const r=rows[i];if(!r)continue;
+      const name=r[cN];
+      if(name==null||!String(name).trim()||/^total\b/i.test(String(name).trim()))continue;
+      const stockRaw=String(r[cS]??'').trim();
+      const qty=num(stockRaw);
+      const isCtn=/\b(ctn|carton|cartons|cotton)\b/i.test(stockRaw);
+      const unitPrice=cUP>=0?money(r[cUP]):0;
+      const explicitAmount=cV>=0?money(r[cV]):0;
+      const value=explicitAmount>0?explicitAmount:(unitPrice>0&&qty>0?unitPrice*qty:0);
+      if(!Number.isFinite(qty)||qty<0)continue;
+      out.push({raw:stockRaw,name:String(name).trim(),sku:cSku>=0&&r[cSku]!=null?String(r[cSku]).trim():'',
+        cat:cC>=0&&r[cC]?String(r[cC]).trim():'',qty,unit:isCtn?'ctn':'pc',unitPrice,value});
+    }
+    if(out.length)return{date:date||today(),file:fileName,rows:out,fileTotal,format:cUP>=0?'products-unit-price-current-stock':(cV>=0?'stock-report-current-stock-value':'standard')};
   }
-  throw new Error('No “Product” and “Stock” columns found in this file.');
+  throw new Error('Stock Report format not recognized. Supported: Product / Unit Purchase Price / Current stock / SKU, or SKU / Product / Category / Current stock / Current Stock Value.');
 }
-function absorb(rep){rep.rows.forEach(r=>{const k=keyOf(r.name);const m=master[k]||(master[k]={name:r.name,packing:null});if(r.cat&&!m.cat)m.cat=r.cat;
-  if(r.unit==='ctn'){m.ctnUnit=true;if(r.qty>0&&r.value>0)m.ctnRate=r.value/r.qty}else if(r.qty>0&&r.value>0){m.rate=r.value/r.qty;if(okP(m))m.ctnRate=m.rate*okP(m)}});saveMaster()}
+function absorb(rep){
+  let pieceRates=0,cartonRates=0,needsPacking=0,skipped=0,matched=0;
+  rep.rows.forEach(r=>{
+    // Match by SKU first where possible, then by normalized product name.
+    let k=null;
+    if(r.sku){
+      k=Object.keys(master).find(x=>String(master[x]?.sku||'').trim().toLowerCase()===String(r.sku).trim().toLowerCase())||null;
+    }
+    if(!k){
+      const nameKey=keyOf(r.name);
+      k=master[nameKey]?nameKey:null;
+    }
+    if(!k)k=keyOf(r.name);
+    const m=master[k]||(master[k]={name:r.name,packing:null});
+    matched++;
+    if(r.sku)m.sku=r.sku;
+    if(r.cat&&!m.cat)m.cat=r.cat;
+
+    const unitPrice=Number(r.unitPrice)||0;
+    const P=okP(m)||0;
+    if(!(unitPrice>0)){skipped++;return}
+
+    // Excel has one Unit Purchase Price column. Interpret it using the stock
+    // unit shown in Current stock: Pieces => piece rate; Cotton/CTN => carton rate.
+    if(r.unit==='ctn'){
+      m.ctnRate=unitPrice;
+      if(P>0&&!m.ctnUnit){
+        m.rate=unitPrice/P;
+        pieceRates++;
+      }else{
+        cartonRates++;
+        if(!P&&!m.ctnUnit)needsPacking++;
+      }
+      m.rateSource='stock-report';
+    }else{
+      m.rate=unitPrice;
+      if(P>0&&!m.ctnUnit){
+        m.ctnRate=unitPrice*P;
+        pieceRates++;
+      }else{
+        pieceRates++;
+        if(!P&&!m.ctnUnit)needsPacking++;
+      }
+      m.rateSource='stock-report';
+    }
+    m.rateUpdated=today();
+    m.src='manual';
+    m.updated=today();
+  });
+  saveMaster();
+  return{pieceRates,cartonRates,needsPacking,skipped,matched};
+}
 function handleFile(f){
   if(!f)return;if(typeof XLSX==='undefined'){toast('The Excel reader did not load — check the internet');return}
-  const rd=new FileReader();rd.onload=e=>{try{const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
-    report=parseWorkbook(wb,f.name);absorb(report);LS.set('cs_report',report);cq('report');renderAll();toast(`${report.rows.length} products loaded — piece rates added to the rate list`)}catch(err){toast(err.message||'Could not read this file')}};
+  const rd=new FileReader();rd.onload=e=>{try{
+    const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
+    report=parseWorkbook(wb,f.name);
+    const rates=absorb(report);
+    LS.set('cs_report',report);cq('report');renderAll();
+    toast(`${report.rows.length} stock rows loaded${report.format==='unit-purchase-price-current-stock'?' (Unit Purchase Price + Current Stock format)':''} · ${rates.pieceRates} per-piece rates updated${rates.cartonRates?` · ${rates.cartonRates} kept as carton rates`:''}${rates.needsPacking?` · ${rates.needsPacking} need packing`:''}${rates.skipped?` · ${rates.skipped} rows had no usable amount/quantity`:''}`);
+  }catch(err){toast(err.message||'Could not read this file')}};
   rd.readAsArrayBuffer(f);
 }
 function srCalc(r){const m=master[keyOf(r.name)]||{};const P=okP(m)||0;
